@@ -12,13 +12,12 @@ class Patch:public Selectable {
 protected:
    Point* _ps;
    Face_p _pFace;
-   Point _K[16]; //bezier surface
+   Point  _K[16]; //bezier surface
    Point   K(int ei, int i);
 
-   static int edgeInd(int ei, int i);
-   static int edgeUInd(int ei, int i);
-
    int _N;
+
+   int _nU, _nV;
 
 public:
 
@@ -27,9 +26,8 @@ public:
 
     static bool isH;
 
-protected:
-    static inline int ind(int i, int j){return i + j*N;}
-    static int N, Ni, NN, NN2;
+    inline int ind(int uv, int n, int i){return i + uv*(_nU*N) + n*N;}
+    static int N, Ni;
     static double T;
 
 public:
@@ -37,8 +35,6 @@ public:
     static void setN(int n){
         N = n;
         Ni = N-1;
-        NN = n*n;
-        NN2 = (NN + N) / 2;
         T = 1.0/Ni;
     }
     static void flipH(){
@@ -49,8 +45,7 @@ public:
 
 class Patch4:public Patch{
 
-    inline Point P(int i, int j)const{return _ps[i + j*N];}
-    Vec3   interpolateN(int, int);
+    inline Point P(int uv, int n, int i)const{return _ps[i + uv*(_nU*N) + n*N];}
 
 protected:
 
@@ -59,7 +54,7 @@ protected:
 public:
 
     void render(int mode = 0);
-    void init();
+    void init(int N);
 
     Patch4(Face_p);
     //~Patch4();

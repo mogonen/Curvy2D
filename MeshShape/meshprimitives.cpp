@@ -64,9 +64,10 @@ MeshShape* MeshShape::insertNGon(const Point& p, int n, int segv, double rad, Me
     }
 
     int mid_off = (segv-1)*nn;
-    for(int i=0; i<n; i++)
-        pMS->_control->addQuad(vmid, vs[i*2+mid_off], vs[i*2+1+mid_off], vs[(i*2+2)%nn+mid_off]);
-
+    for(int i=0; i<n; i++){
+        Face_p f = pMS->_control->addQuad(vmid, vs[i*2+mid_off], vs[i*2+1+mid_off], vs[(i*2+2)%nn+mid_off]);
+        f->reoffset(i%4);
+    }
     delete vs;
 
     pMS->_control->buildEdges();

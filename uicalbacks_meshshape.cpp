@@ -2,6 +2,7 @@
 #include "glwidget.h"
 #include "canvas.h"
 #include "MeshShape/meshshape.h"
+#include "MeshShape/patch.h"
 #include "MeshShape/spineshape.h"
 
 
@@ -9,8 +10,9 @@ QWidget* createAttrWidget(Shape_p pShape)
 {
     CustomDialog * widget = new CustomDialog("Shape Attr");
     //widget->addSpinBox("test:", 1, 8, &MeshShape::GRID_N, 1, "Rows");
-    widget->addColorSel("Diffuse:", &pShape->diffuse, "");
-    QObject::connect(widget,SIGNAL(ValueUpdated()),Session::get()->glWidget(),SLOT(updateGL()));
+    widget->addSpinBox("segments:", 1, 12, &Patch::N, 1);
+    //widget->addColorSel("Diffuse:", &pShape->diffuse, "");
+    QObject::connect(widget,SIGNAL(ValueUpdated()),Session::get()->glWidget(),SLOT(updateActive()));
     return widget;
 }
 
@@ -24,20 +26,20 @@ void createGrid()
 {
     MeshShape* pMS =MeshShape::insertGrid(Point(), MeshShape::GRID_LEN, MeshShape::GRID_M, MeshShape::GRID_N);
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->glWidget()->insertShape(pMS);
+    Session::get()->insertShape(pMS);
 }
 
 void createNGon()
 {
     MeshShape* pMS = MeshShape::insertNGon(Point(), MeshShape::NGON_N, MeshShape::NGON_SEG_V, MeshShape::NGON_RAD);
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->glWidget()->insertShape(pMS);
+    Session::get()->insertShape(pMS);
 }
 
 void createTorus(){
     MeshShape* pMS = MeshShape::insertTorus(Point(), MeshShape::TORUS_N, MeshShape::TORUS_RAD);
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->glWidget()->insertShape(pMS);
+    Session::get()->insertShape(pMS);
 }
 
 void createSpine()
@@ -48,7 +50,7 @@ void createSpine()
         return;
     Shape_p pMS = spine->buildMeshShape();
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget(pMS), (void*)pMS);
-    Session::get()->glWidget()->insertShape(pMS);;
+    Session::get()->insertShape(pMS);
 }
 
 

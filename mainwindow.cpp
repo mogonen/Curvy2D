@@ -95,15 +95,7 @@ void MainWindow::initTools()
 
     QToolBar *toolbar = addToolBar("main toolbar");
 
-    //toolbar->addAction(dragAct);
-
-    toolbar->addSeparator();
-
-    toolbar->addAction(shapeInsertGridAct);
-    toolbar->addAction(shapeInsert2NGonAct);
-    toolbar->addAction(shapeInsertTorusAct);
-    toolbar->addAction(shapeInsertSpineAct);
-
+    //toolbar->addAction(dragAct); 
     toolbar->addSeparator();
 
     toolbar->addAction(dragAct);

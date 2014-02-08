@@ -138,7 +138,7 @@ void ShapeControl::renderControls(Shape_p shape)
 
         glLoadName(svname);
         glBegin(GL_POINTS);
-        glColor3f(1.0, 1.0, 1.0);
+        glColor3f(0, 0, 0);
         if(sv->flag ==1)
             glColor3f(1.0, 1.0, 0);
         glVertex3f(sv->P.x, sv->P.y, 0);
@@ -201,7 +201,7 @@ void MeshShape::render(int mode) {
     if (isInRenderMode() || (!isInRenderMode()&&IsSelectMode(FACE)) )
     {
         qreal r, g, b;
-        diffuse.getRgbF(&r,&g,&b);
+        //diffuse.getRgbF(&r,&g,&b);
 
         GLfloat mat_diff[]   = { (float)r, (float)g, (float)b, 1.0 };
         glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff);
@@ -243,7 +243,7 @@ void MeshShape::render(Face_p pFace, int mode) const
 void Curve::render(int mode) {
 
     Selectable::render(mode);
-    glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.05, 0.05, 0.05);
     selectionColor((Selectable_p)this);
     if (isTheSelected())
         glColor3f(1.0, 0, 0);
@@ -295,10 +295,10 @@ void Patch4::render(int mode)
 
     glColor3f(0,1.0,0);
 
-    for(int v=0; v < Ni; v++)
+   /* for(int v=0; v < N; v++)
     {
         glBegin(GL_LINE_STRIP);
-        for(int u = 0; u< Ni; u++)
+        for(int u = 0; u< N; u++)
         {
             Point p = P(u, v);
             glVertex3f(p.x, p.y, 0);
@@ -308,16 +308,16 @@ void Patch4::render(int mode)
 
     glColor3f(1.0,0,0);
 
-    for(int u=0; u < Ni; u++)
+    for(int u=0; u < N; u++)
     {
         glBegin(GL_LINE_STRIP);
-        for(int v = 0; v< Ni; v++)
+        for(int v = 0; v< N; v++)
         {
             Point p = P(u, v);
             glVertex3f(p.x, p.y, 0);
         }
         glEnd();
-    }
+    }*/
 
 }
 

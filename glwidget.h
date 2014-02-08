@@ -128,6 +128,10 @@ private:
 
     static unsigned int  _renderFlags;
 
+public slots:
+
+    void updateActive();
+
 };
 
 #endif // GLWIDGET_H

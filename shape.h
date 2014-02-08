@@ -146,9 +146,6 @@ public:
     virtual int         load(std::ifstream&){return -1;}
     virtual int         save(std::ofstream&){return -1;}
 
-    //for now
-    QColor diffuse;
-
 };
 
 #endif

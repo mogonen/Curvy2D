@@ -260,6 +260,8 @@ public:
 
     static Session*     get(){return _pSession;}
     static bool         isRender(RenderSetting rs);
+
+
 };
 
 struct ShapeVertex;

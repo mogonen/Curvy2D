@@ -29,8 +29,9 @@ Shape* Session::theShape() const{
 void Session::insertShape(Shape* pShape){
     if (!pShape)
         return;
-    _pCanvas->insert(pShape);
-    _pGlWidget->updateGL();
+    //_pCanvas->insert(pShape);
+    _pGlWidget->insertShape(pShape);
+    _pMainWindow->setAttrWidget((void*)pShape);
 }
 
 void Session::reset(){

@@ -252,9 +252,7 @@ Edge_p MeshShape::extrude(Edge_p e0, double t, VertexMap *pVMap){
     else
         pMesh->addEdge(f->C(3), 0); //e3
 
-    f->Face::update();
-
-
+    f->Face::update(false, e0->C0()->I()+2);
 
     if (isSMOOTH && !pVMap){
         makeSmoothTangents(f->C(2));

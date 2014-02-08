@@ -92,7 +92,7 @@ void GLWidget::initializeGL()
      glShadeModel(GL_SMOOTH);
      //glDepthRange(0.0, 1.0);
 
-     glClearColor(0.0,0.0,0.0,0.0);
+     glClearColor(0.96,0.96,0.96,0.0);
 
      glEnable(GL_DEPTH_TEST);
      glEnable(GL_NORMALIZE);
@@ -362,3 +362,7 @@ void GLWidget::loadCameraParameters()
     gluProject(0,0,0, MvMatrix,ProjMatrix,ViewPort,&m_ZeroX,&m_ZeroY,&m_ZeroZ);
 }
 
+void GLWidget::updateActive(){
+    _pActiveShape->update();
+    updateGL();
+}
