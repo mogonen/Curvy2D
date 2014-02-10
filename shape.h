@@ -117,7 +117,7 @@ public:
     void                removeVertex(ShapeVertex_p sv);
     void                removeVertex(Point_p pP);
     SVList              getVertices() const {return _vertices;}
-    virtual void        outdate(ShapeVertex_p sv){ Renderable::outdate(); }
+    virtual void        outdate(ShapeVertex_p sv){}//{ Renderable::outdate(); }
 
 	//send generic command to the shape
     enum    Command_e {};

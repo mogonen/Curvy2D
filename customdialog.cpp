@@ -263,6 +263,8 @@ int CustomDialog::addLineEdit(QString caption, string *stringValue, QString tool
   if(!tooltip.isEmpty())
     e.lineEdit->setToolTip(tooltip);
 
+  QObject::connect(e.lineEdit, SIGNAL(returnPressed()), this, SLOT(itemChanged()));
+
   e.layout->addWidget(e.label);
   e.layout->addWidget(e.lineEdit);
   layoutNextElement->addLayout(e.layout);

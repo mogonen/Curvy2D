@@ -4,35 +4,48 @@
 
 int     Patch::N;
 int     Patch::Ni;
+int     Patch::NU = 8;
+int     Patch::NV = 8;
 double  Patch::T;
 bool    Patch::isH = true;
 
 
 Patch::Patch(Face_p pF):Selectable(Renderable::SHAPE){
-    _ps = 0;
-    _pFace = pF;
+    _ps     = 0;
+    _pFace  = pF;
     _pFace->pData = new FaceData();
     _pFace->pData->pSurface = this;
     this->pRef = (void*)pF;
 }
 
 Patch4::Patch4(Face_p pF):Patch(pF){
-    init(N);
+    _pattern = 0;
+    init(Patch4::NU, Patch4::NV);
 }
 
-void Patch4::init(int n)
+void Patch4::init(int nu, int nv)
 {
+    _nU = nu;
+    _nV = nv;
+
+    if (_pattern)
+        delete _pattern;
+
+    _pattern = new int[_nU+_nV];
+    for(int i = 0; i < _nU + _nV; i++)
+        _pattern[i] = 0;
+
     if (_ps)
         delete _ps;
-    setN(n);
-    _N = n;
+
+    setN(100);
     _ps = new Point[_nU*_nV*N];
 }
 
 void Patch4::onUpdate(){
 
-    if (_N != N)
-        init(N);
+    if (_nU != NU || _nV != NV)
+        init(NU, NV);
 
     _pFace->update();
 
@@ -86,12 +99,21 @@ void Patch4::onUpdate(){
             Point p;
             for(int bj = 0; bj<4; bj++)
                 for(int bi = 0; bi<4; bi++)
-                    p = p + cubicBernstein(bi, i*T)*cubicBernstein(bj, v*Tv)*_K[bi+bj*4];
+                    p = p + cubicBernstein(bi, v*Tv)*cubicBernstein(bj, i*T)*_K[bi+bj*4];
 
-            _ps[ind(1,v,i)] = p;
+            _ps[ind(1, v, i)] = p;
         }
     }
 }
+
+void Patch4::assignPattern(int uv, int off, int len, int * data)
+{
+    int end = (uv == 0)? _nU :_nV;
+    for(int i = 0; i < end; i++ ){
+        _pattern[i + uv*_nU] = data[(off + i)%len];
+    }
+}
+
 
 Point Patch::K(int ei, int i){
     Corner* ci = C(ei);

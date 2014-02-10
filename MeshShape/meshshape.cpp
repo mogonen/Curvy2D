@@ -44,8 +44,8 @@ Vertex_p MeshShape::addMeshVertex(const Point& p){
 }
 
 MeshShape::SELECTION_e MeshShape::GetSelectMode(){
-    static const SELECTION_e SELECTMODE[] = {NOSELECT, EDGE, FACE, FACE, CORNER, EDGE, NOSELECT};
-    if (_OPMODE > 6)
+    static const SELECTION_e SELECTMODE[] = {NOSELECT, EDGE, FACE, FACE, CORNER, EDGE, EDGE, NOSELECT};
+    if (_OPMODE > 7)
         return NOSELECT;
     return SELECTMODE[(int)_OPMODE];
 }

@@ -19,7 +19,7 @@ void MeshShape::execOP(const Point &p, Selectable_p obj){
     MeshShape* pMS = 0;
 
     //there might be a better way for this
-    if (_OPMODE == EXTRUDE_EDGE || _OPMODE == INSERT_SEGMENT){
+    if (_OPMODE == EXTRUDE_EDGE || _OPMODE == INSERT_SEGMENT || _OPMODE == ASSIGN_PATTERN){
          pE = dynamic_cast<Edge_p>((Edge_p)obj->pRef);
          if (!pE) return;
          pMS = ((MeshShape*)pE->mesh()->caller());
@@ -50,6 +50,12 @@ void MeshShape::execOP(const Point &p, Selectable_p obj){
 
         case MeshShape::DELETE_FACE:
                  pMS->deleteFace(pF);
+        break;
+
+        case MeshShape::ASSIGN_PATTERN:
+        {
+            pMS->assignPattern(pE, PATTERN);
+        }
         break;
 
     }
@@ -297,3 +303,4 @@ void MeshShape::deleteFace(Face_p f){
         //Session::get()->removeShape((Shape_p)mesh->caller());
     }
 }
+

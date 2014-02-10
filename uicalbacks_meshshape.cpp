@@ -10,7 +10,8 @@ QWidget* createAttrWidget(Shape_p pShape)
 {
     CustomDialog * widget = new CustomDialog("Shape Attr");
     //widget->addSpinBox("test:", 1, 8, &MeshShape::GRID_N, 1, "Rows");
-    widget->addSpinBox("segments:", 1, 12, &Patch::N, 1);
+    widget->addSpinBox("U segments:", 2, 24, &Patch::NU, 1);
+    widget->addSpinBox("V segments:", 2, 24, &Patch::NV, 1);
     //widget->addColorSel("Diffuse:", &pShape->diffuse, "");
     QObject::connect(widget,SIGNAL(ValueUpdated()),Session::get()->glWidget(),SLOT(updateActive()));
     return widget;
@@ -53,6 +54,11 @@ void createSpine()
     Session::get()->insertShape(pMS);
 }
 
+
+void assignPattern()
+{
+
+}
 
 void MainWindow::selectExtrudeEdge()
 {
@@ -104,6 +110,13 @@ void MainWindow::newTorus()
     setOptionsWidget(Options::TORUS);
 }
 
+
+void MainWindow::assignPattern(){
+    setOptionsWidget(Options::ASSIGN_PATTERN);
+    MeshShape::setOPMODE(MeshShape::ASSIGN_PATTERN);
+    unselectDrag();
+}
+
 QWidget* createNgonOptions()
 {
     CustomDialog * widget = new CustomDialog("2NGon Options", 0, "Insert", createNGon);
@@ -141,6 +154,12 @@ QWidget* createSpineOptions()
     return widget;
 }
 
+QWidget* createAssignPatternOptions()
+{
+    CustomDialog * widget = new CustomDialog("Pattern Options",0, "Assign", assignPattern, &MeshShape::EXEC_ONCLICK);
+    widget->addLineEdit("pattern:",&MeshShape::PATTERN);
+    return widget;
+}
 
 QWidget* createExtrudeOptions()
 {
@@ -180,5 +199,6 @@ void MainWindow::createAllOptionsWidgets()
     addOptionsWidget(createSpineOptions(), Options::SPINE);
     addOptionsWidget(createExtrudeOptions(), Options::EXTRUDE);
     addOptionsWidget(createInsertSegmentOptions(), Options::INSERT_SEGMENT);
+    addOptionsWidget(createAssignPatternOptions(), Options::ASSIGN_PATTERN);
 }
 

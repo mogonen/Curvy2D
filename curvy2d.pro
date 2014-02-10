@@ -43,7 +43,8 @@ SOURCES += glwidget.cpp \
     glwidget_canvas.cpp \
     selection.cpp \
     session.cpp \
-    render.cpp
+    render.cpp \
+    meshshape/pattern.cpp
 
 QT           += opengl widgets
 

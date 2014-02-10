@@ -103,6 +103,8 @@ private slots:
     void transformShape();
     void deleteShape();
 
+    void assignPattern();
+
 private:
 
 
@@ -161,12 +163,13 @@ private:
 
     //Tools Menu Actions
     QAction *       dragAct;
-    QAction *       renderAct;
 
     QAction *       extrudeEdgeAct;
     QAction *       extrudeFaceAct;
     QAction *       insertSegmentAct;
     QAction *       deleteFaceAct;
+
+    QAction *       assignPatternAct;
 
     //Shape Menu Actions
     QAction *       shapeInsertTorusAct;
@@ -186,7 +189,7 @@ private:
 
     //need to improve this
     struct Options{
-        enum OptionWidget_e {NONE, ELLIPSE, GRID, NGON, TORUS, SPINE, IMAGE_SHAPE, EXTRUDE, INSERT_SEGMENT, DELETE_FACE};
+        enum OptionWidget_e {NONE, ELLIPSE, GRID, NGON, TORUS, SPINE, IMAGE_SHAPE, EXTRUDE, INSERT_SEGMENT, DELETE_FACE, ASSIGN_PATTERN};
     };
 };
 

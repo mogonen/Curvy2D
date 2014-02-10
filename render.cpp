@@ -293,31 +293,46 @@ void Patch4::render(int mode)
         }
     }*/
 
-    glColor3f(0,1.0,0);
 
-   /* for(int v=0; v < N; v++)
+    //glColor3f(0, 1.0 ,0);
+
+    for(int u=0; u < _nU; u++)
     {
+        if (_pattern[u] == 1)
+            glColor3f(0, 1.0 ,0);
+        else if (_pattern[u] == 2)
+            glColor3f(1.0, 0 ,0);
+        else
+            glColor3f(0.8, 0.8, 0.8);
+
         glBegin(GL_LINE_STRIP);
-        for(int u = 0; u< N; u++)
-        {
-            Point p = P(u, v);
+        for(int i = 0; i< N; i++)
+        {               
+            Point p = P(0, u, i);
             glVertex3f(p.x, p.y, 0);
         }
         glEnd();
     }
 
-    glColor3f(1.0,0,0);
+    //glColor3f(1.0, 0, 0);
 
-    for(int u=0; u < N; u++)
+    for(int v=0; v < _nV; v++)
     {
+        if (_pattern[_nU + v] == 1)
+            glColor3f(0, 1.0 ,0);
+        else if (_pattern[_nU + v] == 2)
+            glColor3f(1.0, 0 ,0);
+        else
+            glColor3f(0.8, 0.8, 0.8);
+
         glBegin(GL_LINE_STRIP);
-        for(int v = 0; v< N; v++)
+        for(int i = 0; i < N; i++)
         {
-            Point p = P(u, v);
+            Point p = P(1, v, i);
             glVertex3f(p.x, p.y, 0);
         }
         glEnd();
-    }*/
+    }
 
 }
 

@@ -1,6 +1,7 @@
 #ifndef MESHSHAPE_H
 #define MESHSHAPE_H
 
+#include <string>
 #include "../Shape.h"
 #include "CMesh.h"
 #include "MeshData.h"
@@ -41,9 +42,9 @@ public:
     static MeshShape*       insertNGon(const Point& p, int n, int segv, double rad, MeshShape* pMS = 0);
     static MeshShape*       insertTorus(const Point& p, int n, double rad, MeshShape* pMS = 0);
 
-
     enum OPERATION_e        {NONE, EXTRUDE_EDGE, EXTRUDE_FACE, DELETE_FACE, SPLIT_FACE,
-                             INSERT_SEGMENT, INSERT_GRID, INSERT_2NGON, INSERT_TORUS, INSERT_SPINE};
+                             INSERT_SEGMENT,  ASSIGN_PATTERN,
+                             INSERT_GRID, INSERT_2NGON, INSERT_TORUS, INSERT_SPINE};
 
     enum SELECTION_e        {NOSELECT, EDGE, FACE, CORNER, EDGE_EDGE};
 
@@ -69,6 +70,8 @@ public:
     static double           EXTRUDE_T;
     static bool             isKEEP_TOGETHER;
 
+    static string           PATTERN;
+
 private:
 
     static OPERATION_e _OPMODE;
@@ -80,6 +83,8 @@ private:
     Edge_p                  extrude(Edge_p, double, VertexMap* vmap=0);
     void                    extrudeEdges(SelectionSet, double);
     void                    deleteFace(Face_p);
+
+    void                    assignPattern(Edge_p, string pattern);
 
     //helper functions
     void                    onSplitEdge(Corner_p, double t);

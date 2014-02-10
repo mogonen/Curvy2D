@@ -1,6 +1,7 @@
 #ifndef PATCH_H
 #define PATCH_H
 
+#include <string>
 #include "../Base.h"
 #include "CMesh.h"
 #include "MeshData.h"
@@ -14,10 +15,7 @@ protected:
    Face_p _pFace;
    Point  _K[16]; //bezier surface
    Point   K(int ei, int i);
-
    int _N;
-
-   int _nU, _nV;
 
 public:
 
@@ -26,9 +24,9 @@ public:
 
     static bool isH;
 
-    inline int ind(int uv, int n, int i){return i + uv*(_nU*N) + n*N;}
-    static int N, Ni;
+    static int N, Ni, NU, NV;
     static double T;
+
 
 public:
 
@@ -45,7 +43,10 @@ public:
 
 class Patch4:public Patch{
 
+    inline int ind(int uv, int n, int i){return i + uv*(_nU*N) + n*N;}
     inline Point P(int uv, int n, int i)const{return _ps[i + uv*(_nU*N) + n*N];}
+    int    _nU, _nV;
+    int*   _pattern;
 
 protected:
 
@@ -54,11 +55,15 @@ protected:
 public:
 
     void render(int mode = 0);
-    void init(int N);
+    void init(int nu, int nv);
+
+    void assignPattern(int uv, int off, int len, int * data);
+
+    int U() const {return _nU;}
+    int V() const {return _nV;}
 
     Patch4(Face_p);
     //~Patch4();
-
 
 };
 

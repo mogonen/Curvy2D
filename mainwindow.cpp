@@ -105,6 +105,7 @@ void MainWindow::initTools()
     toolbar->addAction(deleteFaceAct);
 
     toolbar->addSeparator();
+    toolbar->addAction(assignPatternAct);
 
     //init tool options dock
     optionsDockWidget = new QDockWidget(QString("Options"), this);
@@ -261,6 +262,10 @@ void MainWindow::createActions()
     deleteFaceAct->setShortcut(tr("Ctrl+D"));
     connect(deleteFaceAct, SIGNAL(triggered()), this, SLOT(selectDeleteFace()));
 
+    assignPatternAct = new QAction(tr("Assign &Patern"), this);
+    assignPatternAct->setShortcut(tr("Ctrl+P"));
+    connect(assignPatternAct, SIGNAL(triggered()), this, SLOT(assignPattern()));
+
     QActionGroup* toolset = new QActionGroup(this);
 
    /* dragAct->setCheckable(true);
@@ -274,12 +279,15 @@ void MainWindow::createActions()
     extrudeFaceAct->setCheckable(true);
     insertSegmentAct->setCheckable(true);
     deleteFaceAct->setCheckable(true);
+    assignPatternAct->setCheckable(true);
 
     extrudeEdgeAct->setActionGroup(toolset);
     extrudeFaceAct->setActionGroup(toolset);
     insertSegmentAct->setActionGroup(toolset);
     deleteFaceAct->setActionGroup(toolset);
     dragAct->setActionGroup(toolset);
+    assignPatternAct->setActionGroup(toolset);
+
 
     //SHAPE ACTIONS
     shapeInsertTorusAct = new QAction(tr("Torus"), this);
@@ -328,7 +336,6 @@ void MainWindow::createMenus()
     viewMenu->addAction(patchesOnAct);
 
     insertMenu = menuBar()->addMenu("Create");
-    insertMenu->addAction(shapeInsertEllipseAct);
     insertMenu->addAction(shapeInsertGridAct);
     insertMenu->addAction(shapeInsert2NGonAct);
     insertMenu->addAction(shapeInsertTorusAct);
@@ -340,8 +347,7 @@ void MainWindow::createMenus()
 
     shapeMenu->addAction(shapeTransformAct);
     shapeMenu->addAction(shapeDeleteAct);
-    shapeMenu->addAction("Group");
-    shapeMenu->addAction("Rasterize");
+
 
     toolsMenu  = menuBar()->addMenu(tr("Tools"));
     QMenu * GeoTool = toolsMenu->addMenu("Geometry Tools");
@@ -350,7 +356,9 @@ void MainWindow::createMenus()
     GeoTool->addAction(insertSegmentAct);
     GeoTool->addAction(deleteFaceAct);
 
-
+    QMenu * PaternTool = toolsMenu->addMenu("Patern Tools");
+    PaternTool->addAction(assignPatternAct);
+    \
     selectMenu  = menuBar()->addMenu(tr("Select"));
     selectMenu->addAction("Select All");
     selectMenu->addAction("Select Inverse");
@@ -460,4 +468,5 @@ void MainWindow::transformShape(){
 void MainWindow::deleteShape(){
    glWidget->clear();
 }
+
 
