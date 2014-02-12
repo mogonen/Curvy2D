@@ -182,7 +182,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     {
         if (hit){
             Selectable_p pSel = select(hit, SelectBuff);
-            if (is(DRAGMODE_ON) && pSel->type() == Renderable::UI)
+            if (is(DRAGMODE_ON) && pSel->isUI())
             {
                 Session::get()->selectionMan()->startSelect(pSel, event->button() == Qt::LeftButton, event->modifiers() & Qt::ControlModifier);
             }

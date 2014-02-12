@@ -137,7 +137,7 @@ Vec2 ShapeVertex::getTangent(){
 
 //Shape////////////////////////////////////////////////////////////////////////////////////
 
-Shape::Shape():Draggable(Renderable::SHAPE, &_t0){
+Shape::Shape():Draggable(false, &_t0){
     _flags = 0;
     _tM.identity();
     //diffuse.setRed(255);

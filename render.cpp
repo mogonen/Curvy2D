@@ -217,6 +217,9 @@ void MeshShape::render(int mode) {
 void MeshShape::render(Edge_p pEdge) const{
     //if (this != theSHAPE)return;
 
+    if (isInRenderMode()&&!pEdge->isBorder())
+        return;
+
     if (pEdge->pData->pCurve){
         pEdge->pData->pCurve->render(DRAG_MODE);
         return;

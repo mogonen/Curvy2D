@@ -25,7 +25,7 @@ void executeMeshShapeOperations()
 
 void createGrid()
 {
-    MeshShape* pMS =MeshShape::insertGrid(Point(), MeshShape::GRID_LEN, MeshShape::GRID_M, MeshShape::GRID_N);
+    MeshShape* pMS =MeshShape::insertGrid(Point(), MeshShape::GRID_M_LEN, MeshShape::GRID_N_LEN, MeshShape::GRID_M, MeshShape::GRID_N);
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
     Session::get()->insertShape(pMS);
 }
@@ -38,7 +38,7 @@ void createNGon()
 }
 
 void createTorus(){
-    MeshShape* pMS = MeshShape::insertTorus(Point(), MeshShape::TORUS_N, MeshShape::TORUS_RAD);
+    MeshShape* pMS = MeshShape::insertTorus(Point(), MeshShape::TORUS_N,MeshShape::TORUS_V, MeshShape::TORUS_RAD, MeshShape::TORUS_ARC);
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
     Session::get()->insertShape(pMS);
 }
@@ -54,11 +54,6 @@ void createSpine()
     Session::get()->insertShape(pMS);
 }
 
-
-void assignPattern()
-{
-
-}
 
 void MainWindow::selectExtrudeEdge()
 {
@@ -111,9 +106,15 @@ void MainWindow::newTorus()
 }
 
 
-void MainWindow::assignPattern(){
+void MainWindow::assignPatternTool(){
     setOptionsWidget(Options::ASSIGN_PATTERN);
     MeshShape::setOPMODE(MeshShape::ASSIGN_PATTERN);
+    unselectDrag();
+}
+
+void MainWindow::setFoldsTool(){
+    setOptionsWidget(Options::SET_FOLDS);
+    MeshShape::setOPMODE(MeshShape::SET_FOLDS);
     unselectDrag();
 }
 
@@ -132,7 +133,8 @@ QWidget* createGridOptions()
     CustomDialog * widget = new CustomDialog("Grid Options",0, "Insert", createGrid);
     widget->addSpinBox("Rows:", 1, 8, &MeshShape::GRID_N, 1, "Rows");
     widget->addSpinBox("Coloumns:", 1, 8, &MeshShape::GRID_M, 1, "Coloumns");
-    widget->addDblSpinBoxF("Edge Length:", 0.01, 0.5, &MeshShape::GRID_LEN, 2, 0.01, "");
+    widget->addDblSpinBoxF("Rows    Length:", 0.01, 0.5, &MeshShape::GRID_N_LEN, 2, 0.01, "");
+    widget->addDblSpinBoxF("Columns Length:", 0.01, 0.5, &MeshShape::GRID_M_LEN, 2, 0.01, "");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
     return widget;
 }
@@ -140,9 +142,11 @@ QWidget* createGridOptions()
 QWidget* createTorusOptions()
 {
     CustomDialog * widget = new CustomDialog("Torus Options",0, "Insert", createTorus);
-    widget->addSpinBox("Sides:", 1, 8, &MeshShape::TORUS_N, 1, "Sides of 2NGon");
+    widget->addSpinBox("Sides:", 1, 8, &MeshShape::TORUS_N, 1, "Sides of Torus");
+    widget->addSpinBox("V Segments:", 3, 8, &MeshShape::TORUS_V, 1, "Vertical Segments of The Torus");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
     widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshShape::TORUS_RAD, 2, 0.01, "");
+    widget->addDblSpinBoxF("Arc:", 0., 1.0, &MeshShape::TORUS_ARC, 2, 0.01, "");
     return widget;
 }
 
@@ -156,8 +160,15 @@ QWidget* createSpineOptions()
 
 QWidget* createAssignPatternOptions()
 {
-    CustomDialog * widget = new CustomDialog("Pattern Options",0, "Assign", assignPattern, &MeshShape::EXEC_ONCLICK);
+    CustomDialog * widget = new CustomDialog("Pattern Options",0, "Assign", executeMeshShapeOperations, &MeshShape::EXEC_ONCLICK);
     widget->addLineEdit("pattern:",&MeshShape::PATTERN);
+    return widget;
+}
+
+QWidget* createSetFoldsOptions()
+{
+    CustomDialog * widget = new CustomDialog("FoldingOptions",0, "Fold", executeMeshShapeOperations, &MeshShape::EXEC_ONCLICK);
+    widget->addSpinBox("Folds:", 1, 24, &MeshShape::FOLD_N, 1, "Number of Folds");
     return widget;
 }
 
@@ -200,5 +211,6 @@ void MainWindow::createAllOptionsWidgets()
     addOptionsWidget(createExtrudeOptions(), Options::EXTRUDE);
     addOptionsWidget(createInsertSegmentOptions(), Options::INSERT_SEGMENT);
     addOptionsWidget(createAssignPatternOptions(), Options::ASSIGN_PATTERN);
+    addOptionsWidget(createSetFoldsOptions(), Options::SET_FOLDS);
 }
 

@@ -18,7 +18,8 @@ HEADERS += glwidget.h \
     meshshape/meshshape.h \
     meshshape/meshdata.h \
     shapecontrol.h \
-    meshshape/cmesh.h
+    meshshape/cmesh.h \
+    fileio.h
 
 SOURCES += glwidget.cpp \
     main.cpp \
@@ -44,7 +45,8 @@ SOURCES += glwidget.cpp \
     selection.cpp \
     session.cpp \
     render.cpp \
-    meshshape/pattern.cpp
+    meshshape/pattern.cpp \
+    fileio.cpp
 
 QT           += opengl widgets
 

@@ -35,15 +35,16 @@ public:
 
     MeshShape();
     Mesh_p                  mesh() const {return _control;}
+    ShapeType               type() const {return MESH_SHAPE;}
     void                    outdate(ShapeVertex_p sv);
 
     //primitives
-    static MeshShape*       insertGrid(const Point& p, double len, int n, int m, MeshShape* pMS = 0);
+    static MeshShape*       insertGrid(const Point& p, double nlen, double mlen, int n, int m, MeshShape* pMS = 0);
     static MeshShape*       insertNGon(const Point& p, int n, int segv, double rad, MeshShape* pMS = 0);
-    static MeshShape*       insertTorus(const Point& p, int n, double rad, MeshShape* pMS = 0);
+    static MeshShape*       insertTorus(const Point& p, int n, int v, double rad, double arc, MeshShape* pMS = 0);
 
     enum OPERATION_e        {NONE, EXTRUDE_EDGE, EXTRUDE_FACE, DELETE_FACE, SPLIT_FACE,
-                             INSERT_SEGMENT,  ASSIGN_PATTERN,
+                             INSERT_SEGMENT,  ASSIGN_PATTERN, SET_FOLDS,
                              INSERT_GRID, INSERT_2NGON, INSERT_TORUS, INSERT_SPINE};
 
     enum SELECTION_e        {NOSELECT, EDGE, FACE, CORNER, EDGE_EDGE};
@@ -53,18 +54,27 @@ public:
     inline static bool      IsSelectMode(SELECTION_e eMode);
     void                    makeSmoothTangents();
     void                    makeSmoothTangents(Corner_p);
+    void                    makeSmoothCorners(Corner_p);
 
     static void             executeStackOperation();
     static void             execOP(const Point&, Selectable_p obj);
 
-    static double           GRID_LEN;
+    static double           GRID_N_LEN;
+    static double           GRID_M_LEN;
     static int              GRID_N;
     static int              GRID_M;
     static int              NGON_N;
     static int              NGON_SEG_V;
     static double           NGON_RAD;
+
     static int              TORUS_N;
+    static int              TORUS_V;
     static double           TORUS_RAD;
+    static double           TORUS_ARC;
+
+    static int              FOLD_N;
+    static double           FOLD_D;
+
     static bool             EXEC_ONCLICK;
     static bool             isSMOOTH;
     static double           EXTRUDE_T;
@@ -85,6 +95,7 @@ private:
     void                    deleteFace(Face_p);
 
     void                    assignPattern(Edge_p, string pattern);
+    void                    setFolds(Edge_p, int, double min = 0);
 
     //helper functions
     void                    onSplitEdge(Corner_p, double t);
@@ -96,8 +107,6 @@ private:
 void                        onInsertEdge(Edge_p);
 void                        onAddFace(Face_p);
 Bezier*                     initCurve(Edge_p);
-
-
 //void                        executeMeshShapeOperation();
 
 

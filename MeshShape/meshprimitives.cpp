@@ -1,26 +1,37 @@
 #include "meshshape.h"
 
-double   MeshShape::GRID_LEN = 0.2;
+double  MeshShape::GRID_N_LEN = 0.2;
+double  MeshShape::GRID_M_LEN = 0.2;
+
 int     MeshShape::GRID_N  = 2;
 int     MeshShape::GRID_M  = 2;
 int     MeshShape::NGON_N  = 3;
 int     MeshShape::NGON_SEG_V   = 1;
 double  MeshShape::NGON_RAD     = 0.2;
-int     MeshShape::TORUS_N      = 8;
-double  MeshShape::TORUS_RAD    = 0.2;
 
-MeshShape* MeshShape::insertGrid(const Point& p, double len, int n, int m, MeshShape *pMS){
+int     MeshShape::TORUS_N      = 8;
+int     MeshShape::TORUS_V      = 3;
+double  MeshShape::TORUS_RAD    = 0.2;
+double  MeshShape::TORUS_ARC    = 1.0;
+
+MeshShape* MeshShape::insertGrid(const Point& p, double nlen, double mlen, int n, int m, MeshShape *pMS){
 
     if (!pMS)
         pMS = new MeshShape();
 
-    Point p0 = p - Point(len*n/2, -len*m/2);
+    Point p0 = p - Point(nlen*n/2, -mlen*m/2);
 
     m = m?m:n;
     Vertex_p* vs = new Vertex_p[(n+1)*(m+1)];
     for(int j=0; j<m+1; j++)
-        for(int i=0; i<n+1; i++)
-            vs[i+j*(n+1)] = pMS->addMeshVertex(p0+Point(len*i,0)+ Point(0,-len*j));
+        for(int i=0; i<n+1; i++){
+            Point pp = Point(nlen*i,0)+ Point(0,-mlen*j)+p0;
+            if (pp.norm()>0)
+            {
+                pp = p + ((isSMOOTH)? (pp.normalize()*Max(fabs(pp.x),fabs(pp.y)) ):pp);
+            }
+            vs[i+j*(n+1)] = pMS->addMeshVertex(pp);
+        }
 
     for(int j=0; j<m; j++)
         for(int i=0; i<n; i++)
@@ -78,29 +89,32 @@ MeshShape* MeshShape::insertNGon(const Point& p, int n, int segv, double rad, Me
 
 }
 
-MeshShape* MeshShape::insertTorus(const Point& p, int n, double rad, MeshShape* pMS){
+MeshShape* MeshShape::insertTorus(const Point& p, int n, int v, double rad, double arc, MeshShape* pMS)
+{
 
     if (!pMS)
         pMS = new MeshShape();
 
-    int segU = 12;
-    int segV = 3;
+    bool isarc = arc < 0.9999;
 
-    double step_u = 2*PI / segU;
-    Vertex_p* vs = new Vertex_p[segU*segV];
+    int segU = n;
+    int segV = v;
+    int nU = segU+isarc;
 
+    double step_u = 2*PI / segU * arc;
+    Vertex_p* vs = new Vertex_p[nU*segV];
 
     FOR_ALL_J(segV){
-        FOR_ALL_I(segU){
+        FOR_ALL_I(nU){
             double ang_u = -step_u * i;
             Point p(cos(ang_u)*rad, sin(ang_u)*rad);
-            vs[i+j*segU] = pMS->addMeshVertex(p*(1-0.6/segV*j));
+            vs[i+j*nU] = pMS->addMeshVertex(p*(1-0.6/segV*j));
         }
     }
 
     FOR_ALL_J(segV-1){
         FOR_ALL_I(segU){
-            pMS->_control->addQuad(vs[i+j*segU] , vs[(i+1)%segU + j*segU], vs[(i+1)%segU + (j+1)*segU], vs[i + (j+1)*segU]);
+            pMS->_control->addQuad(vs[i+j*nU] , vs[(i+1)%nU + j*nU], vs[(i+1)%nU + (j+1)*nU], vs[i + (j+1)*nU]);
         }
     }
 

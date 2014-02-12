@@ -112,6 +112,59 @@ void MeshShape::makeSmoothTangents(Corner_p pC){
     }
 }
 
+void MeshShape::makeSmoothCorners(Corner_p pC){
+
+    Corner_p c0 = pC;
+
+    Corner_p vprev = c0->vPrev();
+    Corner_p vnext = c0->vNext();
+
+    if (vprev && vnext){
+        return; //this is not a corner
+    }
+
+    if (!vprev && !vnext ){
+        ShapeVertex_p sv_tan0 = c0->E()->pData->getTangentSV(c0);
+        sv_tan0->setPair(c0->prev()->E()->pData->getTangentSV(c0));
+        Vec2 tan = P0(c0->next()) - P0(c0->prev());
+        sv_tan0->setTangent(tan/6.0, false, true);
+        return;
+    }
+
+    if (vprev){
+
+        ShapeVertex_p sv_tan0 = c0->E()->pData->getTangentSV(c0);
+        while(Corner_p c = vprev->vPrev()){
+            vprev = c;
+        }
+
+        ShapeVertex_p sv_tan1 = vprev->prev()->E()->pData->getTangentSV(vprev);
+
+        if (sv_tan1->pair() != c0->prev()->E()->pData->getTangentSV(c0)) //the border is sharp already
+            return;
+
+        sv_tan0->setPair(sv_tan1);
+        Vec2 tan = P0(c0->next()) - P0(vprev->prev());
+        sv_tan0->setTangent(tan/6.0,c0->E()->isBorder(), true);
+
+    }else{
+
+        ShapeVertex_p sv_tan0 = c0->prev()->E()->pData->getTangentSV(c0);
+        while(Corner_p c = vnext->vNext()){
+            vnext = c;
+        }
+
+        ShapeVertex_p sv_tan1 = vnext->E()->pData->getTangentSV(vnext);
+
+        if (sv_tan1->pair()!= c0->E()->pData->getTangentSV(c0)) //the border is sharp already
+            return;
+
+        sv_tan0->setPair(sv_tan1);
+        Vec2 tan = P0(c0->prev()) - P0(vnext->next());
+        sv_tan0->setTangent(tan/6.0,true, true);
+    }
+}
+
 Bezier* initCurve(Edge_p e){
 
     if (!e->pData)
@@ -160,7 +213,12 @@ void onAddFace(Face_p pF)
 
 void MeshShape::onSplitEdge(Corner_p c, double t)
 {
-    c = c->isC0()? c : c->vNext();
+    bool isforward = true;
+    if (!c->isC0())
+    {
+        c = c->vNext();
+        isforward = false;
+    }
 
     MeshShape* pMS = (MeshShape*) c->V()->mesh()->caller();
 
@@ -181,7 +239,8 @@ void MeshShape::onSplitEdge(Corner_p c, double t)
     Bezier* curve0 = e0->pData->pCurve;
 
     Point newCP[7];
-    curve0->calculateDivideCV(t, newCP);
+    //bool isforward = curve0->pCV(0) == e0->C0()->V()->pData->pP();
+    curve0->calculateDivideCV(isforward? t : (1-t), newCP);
 
     curve0->set(c->V()->pData->pP(), 3);
 
@@ -194,22 +253,5 @@ void MeshShape::onSplitEdge(Corner_p c, double t)
     curve1->pCV(1)->set(newCP[4]);
     curve1->pCV(2)->set(newCP[5]);
 
-}
-
-void MeshShape::adjustInsertedSegmentTangents(Corner_p pC){
-    double t = 0.5;
-    Corner_p vnext = pC->vNext();
-    ShapeVertex_p tanU = vnext->E()->pData->getTangentSV(vnext);
-    ShapeVertex_p tanD = pC->prev()->E()->pData->getTangentSV(pC);
-
-    ShapeVertex_p tanRD = pC->next()->E()->pData->getTangentSV(pC->next());
-    ShapeVertex_p tanLD = pC->vPrev() ->E()->pData->getTangentSV(pC->next());
-
-    tanD->P = tanLD->P*(1-t) + tanRD->P*t;
-
-    ShapeVertex_p tanRU = vnext->prev()->prev()->E()->pData->getTangentSV(vnext->prev());
-    Corner_p cLU = vnext->vNext()->next();
-    ShapeVertex_p tanLU = cLU->E()->pData->getTangentSV(cLU);
-    tanU->P = tanRU->P*(1-t) + tanLU->P*t;
 
 }

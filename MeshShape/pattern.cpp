@@ -21,6 +21,7 @@ int * parsePattern(string patternstr , int &len)
 
 void  MeshShape::assignPattern(Edge_p pE, string patternstr)
 {
+
     if (!pE )
         return;
 
@@ -43,4 +44,27 @@ void  MeshShape::assignPattern(Edge_p pE, string patternstr)
         off+= (i%2) ? patch->V() : patch->U();
     }
 
+}
+
+void MeshShape::setFolds(Edge_p pE, int n, double dmin)
+{
+    if (!pE )
+        return;
+
+    //Mesh_p pMesh = pE->mesh();
+    Corner* c0 = pE->C0();
+    Corner* c1 = pE->C1();
+
+    Face_p endf = (c1)?c1->F():0;
+
+    while(c0 && c0->F()!=endf)
+    {
+        Patch4* patch = (Patch4*)c0->F()->pData->pSurface;
+        int i = c0->I();
+        if (i%2)
+            patch->init(n, patch->V());
+       else
+            patch->init(patch->U(), n);
+        c0 = c0->prev()->vPrev();
+    }
 }

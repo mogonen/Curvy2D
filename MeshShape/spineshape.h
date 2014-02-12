@@ -39,6 +39,7 @@ public:
 
     SpineShape(){ _lastV=0; }
     void render(int mode = 0);
+    ShapeType   type() const {return SPINE_SHAPE;}
 
     MeshShape*      buildMeshShape(MeshShape* pMS=0);
 

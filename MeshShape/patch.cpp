@@ -10,7 +10,7 @@ double  Patch::T;
 bool    Patch::isH = true;
 
 
-Patch::Patch(Face_p pF):Selectable(Renderable::SHAPE){
+Patch::Patch(Face_p pF):Selectable(false){
     _ps     = 0;
     _pFace  = pF;
     _pFace->pData = new FaceData();
@@ -44,9 +44,9 @@ void Patch4::init(int nu, int nv)
 
 void Patch4::onUpdate(){
 
-    if (_nU != NU || _nV != NV)
+    /*if (_nU != NU || _nV != NV)
         init(NU, NV);
-
+*/
     _pFace->update();
 
     //init bezier surface points
@@ -78,7 +78,7 @@ void Patch4::onUpdate(){
         }
     */
 
-    double Tu = 1.0 / (_nU - 1), Tv = 1.0 / (_nV - 1);
+    double Tu = 1.0 / _nU, Tv = 1.0 /_nV;
     for(int u = 0; u < _nU; u++)
     {
         for(int i=0; i<N; i++)
@@ -86,7 +86,7 @@ void Patch4::onUpdate(){
             Point p;
             for(int bj = 0; bj<4; bj++)
                 for(int bi = 0; bi<4; bi++)
-                    p = p + cubicBernstein(bi, i*T)*cubicBernstein(bj, u*Tu)*_K[bi+bj*4];
+                    p = p + cubicBernstein(bi, i*T)*cubicBernstein(bj, (u+1)*Tu)*_K[bi+bj*4];
 
             _ps[ind(0,u,i)] = p;
         }
@@ -99,7 +99,7 @@ void Patch4::onUpdate(){
             Point p;
             for(int bj = 0; bj<4; bj++)
                 for(int bi = 0; bi<4; bi++)
-                    p = p + cubicBernstein(bi, v*Tv)*cubicBernstein(bj, i*T)*_K[bi+bj*4];
+                    p = p + cubicBernstein(bi, (v+1)*Tv)*cubicBernstein(bj, i*T)*_K[bi+bj*4];
 
             _ps[ind(1, v, i)] = p;
         }
@@ -110,7 +110,8 @@ void Patch4::assignPattern(int uv, int off, int len, int * data)
 {
     int end = (uv == 0)? _nU :_nV;
     for(int i = 0; i < end; i++ ){
-        _pattern[i + uv*_nU] = data[(off + i)%len];
+        int p =  data[(off + i)%len];
+        _pattern[i + uv*_nU] = p;
     }
 }
 

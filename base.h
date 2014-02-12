@@ -61,10 +61,9 @@ protected:
 public:
     virtual void render(int mode = 0) = 0;
 
-    enum Type_e {NONE, UI, SHAPE};
 
-    Renderable(Type_e type):_type(type){_upToDate = false;}
-    Type_e type() const {return _type;}
+    Renderable(bool isUI):_isUI(isUI){_upToDate = false;}
+    bool isUI() const {return _isUI;}
 
 //    void renderUpToDate() {
 //        ensureUpToDate();
@@ -90,7 +89,7 @@ public:
     Void_p pRef; //generic pointer to refering object
 
 private:
-    Type_e _type;
+    bool _isUI;
     bool _upToDate;
 };
 
@@ -112,7 +111,7 @@ public:
 
     enum Click_e{UP, DOWN, R_UP, R_DOWN};
 
-    Selectable(Type_e type);
+    Selectable(bool isUI);
     virtual ~Selectable();
 
     virtual void render(int mode = 0);
@@ -176,7 +175,7 @@ public:
 
     bool isLocked;
 
-    Draggable(Type_e type, Point_p pP = 0):Selectable(type){
+    Draggable(bool isUI, Point_p pP = 0):Selectable(isUI){
         if (pP){
             makeDraggable();
         }
@@ -266,5 +265,23 @@ public:
 
 struct ShapeVertex;
 bool isInRenderMode();
+
+
+class Command{
+    int _id;
+public:
+
+    Command();
+
+    virtual void exec() = 0;
+    virtual void unexec() = 0;
+};
+
+class FileIO {
+
+public:
+    virtual bool load(char * fname);
+    virtual bool save(char * fname);
+};
 
 #endif

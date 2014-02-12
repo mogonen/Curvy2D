@@ -6,6 +6,9 @@ bool MeshShape::isSMOOTH = true;
 bool MeshShape::isKEEP_TOGETHER = false;
 bool MeshShape::EXEC_ONCLICK = true;
 
+int MeshShape::FOLD_N = 8;
+double MeshShape::FOLD_D = 0;
+
 std::map<Vertex_p, Corner_p> vertexToCornerMap;
 
 //all operations on meshshape needs to be made static to allow operation on all layers
@@ -19,7 +22,7 @@ void MeshShape::execOP(const Point &p, Selectable_p obj){
     MeshShape* pMS = 0;
 
     //there might be a better way for this
-    if (_OPMODE == EXTRUDE_EDGE || _OPMODE == INSERT_SEGMENT || _OPMODE == ASSIGN_PATTERN){
+    if (_OPMODE == EXTRUDE_EDGE || _OPMODE == INSERT_SEGMENT || _OPMODE == ASSIGN_PATTERN || _OPMODE == SET_FOLDS){
          pE = dynamic_cast<Edge_p>((Edge_p)obj->pRef);
          if (!pE) return;
          pMS = ((MeshShape*)pE->mesh()->caller());
@@ -58,6 +61,12 @@ void MeshShape::execOP(const Point &p, Selectable_p obj){
         }
         break;
 
+        case MeshShape::SET_FOLDS:
+        {
+            pMS->setFolds(pE, FOLD_N, FOLD_D);
+        }
+        break;
+
     }
 
     if (_OPMODE != MeshShape::DELETE_FACE)
@@ -73,6 +82,39 @@ void MeshShape::executeStackOperation(){
     }
 }
 
+Point computeVerticalTangent(double t, Edge_p pE, Face_p pF =0)
+{
+    bool isforward = (!pF) || (pF == pE->C0()->F());
+
+    Point p[8];
+    p[0] = pE->pData->pCurve->CV(0);
+    p[1] = pE->pData->pCurve->CV(1);
+    p[2] = pE->pData->pCurve->CV(2);
+    p[3] = pE->pData->pCurve->CV(3);
+
+    if (isforward){
+
+        p[4] = pE->C0()->prev()->E()->pData->getTangentSV(pE->C0())->P;
+        p[7] = pE->C0()->next()->E()->pData->getTangentSV(pE->C0()->next())->P;
+
+    }else{
+        p[4] = pE->C1()->next()->E()->pData->getTangentSV(pE->C1()->next())->P;
+        p[7] = pE->C1()->prev()->E()->pData->getTangentSV(pE->C1())->P;
+        t=1-t;
+    }
+
+    p[5] = p[4] + p[1] - p[0];
+    p[6] = p[7] + p[2] - p[3];
+
+    Point p45 = p[4]*(1-t) + p[5]*(t);
+    Point p56 = p[5]*(1-t) + p[6]*(t);
+    Point p67 = p[6]*(1-t) + p[7]*(t);
+
+    Point p0 = p45*(1-t) + p56*t;
+    Point p1 = p56*(1-t) + p67*t;
+    return p0*(1-t) + p1*t;
+}
+
 void MeshShape::insertSegment(Edge_p e, const Point & p){
 
     if (!e )
@@ -82,7 +124,10 @@ void MeshShape::insertSegment(Edge_p e, const Point & p){
 
     list<Corner_p> clist;
 
-    double t = 0.5;
+    double t;
+    e->pData->pCurve->computeDistance(p, t);
+
+    Point tan0 = computeVerticalTangent(t, e);
     Corner* c0 = pMesh->splitEdge(e, addMeshVertex());
     onSplitEdge(c0, t);
 
@@ -91,10 +136,21 @@ void MeshShape::insertSegment(Edge_p e, const Point & p){
 
     while(c0 && c0->F()!=endf){
 
-        Corner* c01 = pMesh->splitEdge(c0->next()->next()->E(), addMeshVertex() ,c0->F());
-        onSplitEdge(c01, (1-t));
+        Point tan1  = computeVerticalTangent((1-t), c0->next()->next()->E(), c0->F());
+
+        Corner_p c0nnvn = c0->next()->next()->vNext();
+        Face_p f1 = c0nnvn ? c0nnvn->F():0;
+        Point tan00 = computeVerticalTangent(t, c0->next()->next()->E(),f1);
+
+        Corner* c01 = pMesh->splitEdge(c0->next()->next()->E(), addMeshVertex(), c0->F());
+        onSplitEdge(c01, 1-t);
+
         Corner* c0n = c01->vNext();
-        pMesh->insertEdge(c0, c01);
+        Edge_p pEnew = pMesh->insertEdge(c0, c01);
+        pEnew->pData->pSV[1]->P.set(tan0);
+        pEnew->pData->pSV[2]->P.set(tan1);
+        tan0 = tan00;
+
         clist.push_back(c0);
         c0 = c0n;
     }
@@ -103,7 +159,7 @@ void MeshShape::insertSegment(Edge_p e, const Point & p){
         (pMesh->insertEdge(c0, c0->next()->next()->next()));
     }else while(c1){
         Corner* c11 = pMesh->splitEdge(c1->next()->next()->E(), addMeshVertex(), c1->F());
-        onSplitEdge(c11, 1-t);
+        onSplitEdge(c11, t);
         Corner* c1n = c11->vNext();
         pMesh->insertEdge(c1, c11);
         clist.push_back(c1);
@@ -261,8 +317,9 @@ Edge_p MeshShape::extrude(Edge_p e0, double t, VertexMap *pVMap){
     f->Face::update(false, e0->C0()->I()+2);
 
     if (isSMOOTH && !pVMap){
-        makeSmoothTangents(f->C(2));
-        makeSmoothTangents(f->C(3));
+        for(int i=0; i<4; i++)
+            makeSmoothCorners(f->C(i));
+        //makeSmoothTangents(f->C(3));
     }
 
     return e2;
@@ -303,4 +360,3 @@ void MeshShape::deleteFace(Face_p f){
         //Session::get()->removeShape((Shape_p)mesh->caller());
     }
 }
-

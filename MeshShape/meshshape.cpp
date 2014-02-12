@@ -19,7 +19,7 @@ void MeshShape::onClick(const Point & p, Click_e eClick)
     {
         Selectable_p obj = Session::get()->selectionMan()->getLastSelected();
 
-        if (!obj || obj->type() != Renderable::SHAPE)
+        if (!obj || obj->isUI())
             return;
 
         execOP(p, obj);
@@ -44,8 +44,8 @@ Vertex_p MeshShape::addMeshVertex(const Point& p){
 }
 
 MeshShape::SELECTION_e MeshShape::GetSelectMode(){
-    static const SELECTION_e SELECTMODE[] = {NOSELECT, EDGE, FACE, FACE, CORNER, EDGE, EDGE, NOSELECT};
-    if (_OPMODE > 7)
+    static const SELECTION_e SELECTMODE[] = {NOSELECT, EDGE, FACE, FACE, CORNER, EDGE, EDGE, EDGE, NOSELECT};
+    if (_OPMODE > 8)
         return NOSELECT;
     return SELECTMODE[(int)_OPMODE];
 }

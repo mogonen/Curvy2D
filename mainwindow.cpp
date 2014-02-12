@@ -106,7 +106,7 @@ void MainWindow::initTools()
 
     toolbar->addSeparator();
     toolbar->addAction(assignPatternAct);
-
+    toolbar->addAction(setFoldsAct);
     //init tool options dock
     optionsDockWidget = new QDockWidget(QString("Options"), this);
 
@@ -264,7 +264,12 @@ void MainWindow::createActions()
 
     assignPatternAct = new QAction(tr("Assign &Patern"), this);
     assignPatternAct->setShortcut(tr("Ctrl+P"));
-    connect(assignPatternAct, SIGNAL(triggered()), this, SLOT(assignPattern()));
+    connect(assignPatternAct, SIGNAL(triggered()), this, SLOT(assignPatternTool()));
+
+    setFoldsAct = new QAction(tr("&Fold"), this);
+    setFoldsAct->setShortcut(tr("Ctrl+F"));
+    connect(setFoldsAct, SIGNAL(triggered()), this, SLOT(setFoldsTool()));
+
 
     QActionGroup* toolset = new QActionGroup(this);
 
@@ -280,6 +285,7 @@ void MainWindow::createActions()
     insertSegmentAct->setCheckable(true);
     deleteFaceAct->setCheckable(true);
     assignPatternAct->setCheckable(true);
+    setFoldsAct->setCheckable(true);
 
     extrudeEdgeAct->setActionGroup(toolset);
     extrudeFaceAct->setActionGroup(toolset);
@@ -287,7 +293,7 @@ void MainWindow::createActions()
     deleteFaceAct->setActionGroup(toolset);
     dragAct->setActionGroup(toolset);
     assignPatternAct->setActionGroup(toolset);
-
+    setFoldsAct->setActionGroup(toolset);
 
     //SHAPE ACTIONS
     shapeInsertTorusAct = new QAction(tr("Torus"), this);

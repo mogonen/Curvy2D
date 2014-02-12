@@ -23,6 +23,8 @@ typedef ShapeVertex*                    ShapeVertex_p;
 typedef std::list<ShapeVertex_p>        SVList;
 typedef std::map<int, ShapeVertex_p>    SVMap;
 
+enum ShapeType {MESH_SHAPE, SPINE_SHAPE, ELLIPSE_SHAPE, IMAGE_SHAPE};
+
 //4 channel unsigned bytes assumed here.
 struct textureInfo
 {
@@ -110,6 +112,8 @@ public:
     Shape();
     virtual ~Shape();
     void                render(int mode = 0);
+    virtual ShapeType   type() const = 0;
+
 
     //Vertex Handling
     ShapeVertex_p       addVertex();
@@ -142,9 +146,10 @@ public:
     bool                is(unsigned int bit){return _flags & (1 << bit);}
     void                set(unsigned int bit){_flags |= (1 << bit);}
     void                unset(unsigned int bit){_flags &= ~(1 << bit);}
+
 	//save&load
-    virtual int         load(std::ifstream&){return -1;}
-    virtual int         save(std::ofstream&){return -1;}
+    virtual bool         load(std::ifstream&){return false;}
+    virtual bool         save(std::ofstream&){return false;}
 
 };
 
