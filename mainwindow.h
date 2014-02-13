@@ -76,6 +76,13 @@ public:
 private slots:
 
     void newFile();
+    void openFile();
+    void saveFile();
+    void saveFileAs();
+
+    void undo();
+    void redo();
+
     void about();
 
     void viewOptions();
@@ -133,6 +140,7 @@ private:
 
     //Menu Pointers
     QMenu           *fileMenu;
+    QMenu           *editMenu;
     QMenu           *viewMenu;
     QMenu           *displayMenu;
     QMenu           *shapeMenu;
@@ -156,11 +164,18 @@ private:
 
     //File Menu Actions
     QAction *       fileNewAct;
+    QAction *       fileSaveAct;
+    QAction *       fileSaveAsAct;
+    QAction *       fileOpenAct;
+
+    //Edit Menu Action
+    QAction *       editUndoAct;
+    QAction *       editRedoAct;
+
 
     //view
     QAction *       viewOptionsAct;
     QAction *       viewAttrAct;
-
 
     //Tools Menu Actions
     QAction *       dragAct;
@@ -184,14 +199,14 @@ private:
     QAction *       shapeTransformAct;
     QAction *       shapeDeleteAct;
 
-    //QAction *       windowSh
+    //QAction *       window
 
     std::map<int, int>      _optionWidgetIDs;
     std::map<void*, int>    _attrWidgetIDs;
 
     //need to improve this
     struct Options{
-        enum OptionWidget_e {NONE, ELLIPSE, GRID, NGON, TORUS, SPINE, IMAGE_SHAPE, EXTRUDE, INSERT_SEGMENT, DELETE_FACE, ASSIGN_PATTERN, SET_FOLDS};
+        enum OptionWidget_e {NONE, DRAG, ELLIPSE, GRID, NGON, TORUS, SPINE, IMAGE_SHAPE, EXTRUDE, INSERT_SEGMENT, DELETE_FACE, ASSIGN_PATTERN, SET_FOLDS};
     };
 };
 

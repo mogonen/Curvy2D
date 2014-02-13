@@ -1,5 +1,5 @@
-#ifndef __SHAPE_H__
-#define __SHAPE_H__
+#ifndef SHAPE_H
+#define SHAPE_H
 
 #include <list>
 #include <map>
@@ -51,7 +51,7 @@ struct ShapeVertex
 
     QColor              C0, C1; //dark & bright images -> later should be moved to somewhere else
 
-    void drag(const Vec2& t, bool isNormal = false);
+    void drag(const Vec2& t, bool isNormal = false, bool isC2 = false);
 
     void adopt(ShapeVertex_p sv);
     void setPair(ShapeVertex_p sv, bool isSetTangent = false , bool isSetNormal = false);
@@ -105,7 +105,8 @@ protected:
     virtual void        onRotate(double ang){}
     virtual void        onScale(const Vec2&){}
     virtual void        onApplyT(const Matrix3x3&){}
-    virtual void        onClick(const Point&, Click_e){}
+    virtual void        onClick(const Click&){}
+    virtual void        onDrag(ShapeVertex_p, const Vec2&){}
 
 public:
 
@@ -126,7 +127,7 @@ public:
 	//send generic command to the shape
     enum    Command_e {};
     virtual void        exec(Command_e){}
-    void                sendClick(const Point& p, Click_e click);
+    void                sendClick(const Click&);
 
     //transformations
     Point               gT();
@@ -138,6 +139,7 @@ public:
     void                resetT();
     void                frezeT();
     void                applyT(const Matrix3x3&);
+    void                drag(ShapeVertex_p, const Vec2&);
 
     virtual void        getBBox(BBox& bbox) const;
     void                centerPivot();

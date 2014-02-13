@@ -33,7 +33,7 @@ class SpineShape : public Shape
 
 protected:
 
-    void onClick(const Point &, Click_e);
+    void onClick(const Click&);
 
 public:
 

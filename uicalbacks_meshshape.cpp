@@ -4,6 +4,8 @@
 #include "MeshShape/meshshape.h"
 #include "MeshShape/patch.h"
 #include "MeshShape/spineshape.h"
+#include "MeshShape/meshcommands.h"
+#include "commands.h"
 
 
 QWidget* createAttrWidget(Shape_p pShape)
@@ -19,67 +21,78 @@ QWidget* createAttrWidget(Shape_p pShape)
 
 void executeMeshShapeOperations()
 {
-    MeshShape::executeStackOperation();
+    //MeshShape::executeStackOperation();
     MainWindow::updateGL();
 }
 
 void createGrid()
 {
-    MeshShape* pMS =MeshShape::insertGrid(Point(), MeshShape::GRID_M_LEN, MeshShape::GRID_N_LEN, MeshShape::GRID_M, MeshShape::GRID_N);
-    Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->insertShape(pMS);
+    Session::get()->setCommand(new MeshPrimitive(MeshPrimitive::GRID));
+    Session::get()->exec();
 }
 
 void createNGon()
 {
-    MeshShape* pMS = MeshShape::insertNGon(Point(), MeshShape::NGON_N, MeshShape::NGON_SEG_V, MeshShape::NGON_RAD);
-    Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->insertShape(pMS);
+    Session::get()->setCommand(new MeshPrimitive(MeshPrimitive::TWO_NGON));
+    Session::get()->exec();
 }
 
 void createTorus(){
-    MeshShape* pMS = MeshShape::insertTorus(Point(), MeshShape::TORUS_N,MeshShape::TORUS_V, MeshShape::TORUS_RAD, MeshShape::TORUS_ARC);
-    Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
-    Session::get()->insertShape(pMS);
+   Session::get()->setCommand(new MeshPrimitive(MeshPrimitive::TORUS));
+   Session::get()->exec();
+    //Session::get()->mainWindow()->addAttrWidget(createAttrWidget((Shape_p)pMS), (void*)pMS);
 }
 
 void createSpine()
 {
-    Shape_p shape = Session::get()->theShape();
+    /*Shape_p shape = Session::get()->theShape();
     SpineShape* spine = dynamic_cast<SpineShape*>(shape);
     if (spine==0)
         return;
     Shape_p pMS = spine->buildMeshShape();
     Session::get()->mainWindow()->addAttrWidget(createAttrWidget(pMS), (void*)pMS);
-    Session::get()->insertShape(pMS);
+    Session::get()->insertShape(pMS);*/
 }
 
 
 void MainWindow::selectExtrudeEdge()
 {
     setOptionsWidget(Options::EXTRUDE);
-    MeshShape::setOPMODE(MeshShape::EXTRUDE_EDGE);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::EXTRUDE_EDGE));
     unselectDrag();
 }
 
 void MainWindow::selectExtrudeFace()
 {
     setOptionsWidget(Options::EXTRUDE);
-    MeshShape::setOPMODE(MeshShape::EXTRUDE_FACE);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::EXTRUDE_FACE));
     unselectDrag();
 }
 
 void MainWindow::selectDeleteFace()
 {
     setOptionsWidget(Options::NONE);
-    MeshShape::setOPMODE(MeshShape::DELETE_FACE);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::DELETE_FACE));
     unselectDrag();
 }
 
 void MainWindow::selectInsertSegment()
 {
     setOptionsWidget(Options::INSERT_SEGMENT);
-    MeshShape::setOPMODE(MeshShape::INSERT_SEGMENT);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::INSERT_SEGMENT));
+    unselectDrag();
+}
+
+void MainWindow::assignPatternTool(){
+    setOptionsWidget(Options::ASSIGN_PATTERN);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::ASSIGN_PATTERN));
+    //MeshShape::setOPMODE(MeshShape::ASSIGN_PATTERN);
+    unselectDrag();
+}
+
+void MainWindow::setFoldsTool(){
+    setOptionsWidget(Options::SET_FOLDS);
+    Session::get()->setCommand(new MeshOperation(MeshOperation::SET_FOLDS));
     unselectDrag();
 }
 
@@ -105,36 +118,31 @@ void MainWindow::newTorus()
     setOptionsWidget(Options::TORUS);
 }
 
-
-void MainWindow::assignPatternTool(){
-    setOptionsWidget(Options::ASSIGN_PATTERN);
-    MeshShape::setOPMODE(MeshShape::ASSIGN_PATTERN);
-    unselectDrag();
-}
-
-void MainWindow::setFoldsTool(){
-    setOptionsWidget(Options::SET_FOLDS);
-    MeshShape::setOPMODE(MeshShape::SET_FOLDS);
-    unselectDrag();
-}
-
-QWidget* createNgonOptions()
+QWidget* createDragOptions()
 {
-    CustomDialog * widget = new CustomDialog("2NGon Options", 0, "Insert", createNGon);
-    widget->addSpinBox("Sides:", 1, 8, &MeshShape::NGON_N, 1, "Sides of 2NGon");
-    widget->addSpinBox("Segments:", 1, 4, &MeshShape::NGON_SEG_V, 1, "Rows");
-    widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshShape::NGON_RAD, 2, 0.01, "");
-    widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
+    CustomDialog * widget = new CustomDialog("Drag Tool Options",0);
+    widget->addRadioGrp("Tool:","Default|AutoBind|ManualBind|Break", (int*)(&Drag::TOOL));
+    widget->addRadioGrp("Cont:","C0|C1|C2", (int*)(&Drag::CONT));
     return widget;
 }
 
 QWidget* createGridOptions()
 {
     CustomDialog * widget = new CustomDialog("Grid Options",0, "Insert", createGrid);
-    widget->addSpinBox("Rows:", 1, 8, &MeshShape::GRID_N, 1, "Rows");
-    widget->addSpinBox("Coloumns:", 1, 8, &MeshShape::GRID_M, 1, "Coloumns");
-    widget->addDblSpinBoxF("Rows    Length:", 0.01, 0.5, &MeshShape::GRID_N_LEN, 2, 0.01, "");
-    widget->addDblSpinBoxF("Columns Length:", 0.01, 0.5, &MeshShape::GRID_M_LEN, 2, 0.01, "");
+    widget->addSpinBox("Rows:", 1, 8, &MeshPrimitive::GRID_N, 1, "Rows");
+    widget->addSpinBox("Coloumns:", 1, 8, &MeshPrimitive::GRID_M, 1, "Coloumns");
+    widget->addDblSpinBoxF("Rows    Length:", 0.01, 0.5, &MeshPrimitive::GRID_N_LEN, 2, 0.01, "");
+    widget->addDblSpinBoxF("Columns Length:", 0.01, 0.5, &MeshPrimitive::GRID_M_LEN, 2, 0.01, "");
+    widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
+    return widget;
+}
+
+QWidget* createNgonOptions()
+{
+    CustomDialog * widget = new CustomDialog("2NGon Options", 0, "Insert", createNGon);
+    widget->addSpinBox("Sides:", 1, 8, &MeshPrimitive::NGON_N, 1, "Sides of 2NGon");
+    widget->addSpinBox("Segments:", 1, 4, &MeshPrimitive::NGON_SEG_V, 1, "Rows");
+    widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshPrimitive::NGON_RAD, 2, 0.01, "");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
     return widget;
 }
@@ -142,11 +150,11 @@ QWidget* createGridOptions()
 QWidget* createTorusOptions()
 {
     CustomDialog * widget = new CustomDialog("Torus Options",0, "Insert", createTorus);
-    widget->addSpinBox("Sides:", 1, 8, &MeshShape::TORUS_N, 1, "Sides of Torus");
-    widget->addSpinBox("V Segments:", 3, 8, &MeshShape::TORUS_V, 1, "Vertical Segments of The Torus");
+    widget->addSpinBox("Sides:", 1, 8, &MeshPrimitive::TORUS_N, 1, "Sides of Torus");
+    widget->addSpinBox("V Segments:", 3, 8, &MeshPrimitive::TORUS_V, 1, "Vertical Segments of The Torus");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
-    widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshShape::TORUS_RAD, 2, 0.01, "");
-    widget->addDblSpinBoxF("Arc:", 0., 1.0, &MeshShape::TORUS_ARC, 2, 0.01, "");
+    widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshPrimitive::TORUS_RAD, 2, 0.01, "");
+    widget->addDblSpinBoxF("Arc:", 0., 1.0, &MeshPrimitive::TORUS_ARC, 2, 0.01, "");
     return widget;
 }
 
@@ -160,24 +168,24 @@ QWidget* createSpineOptions()
 
 QWidget* createAssignPatternOptions()
 {
-    CustomDialog * widget = new CustomDialog("Pattern Options",0, "Assign", executeMeshShapeOperations, &MeshShape::EXEC_ONCLICK);
-    widget->addLineEdit("pattern:",&MeshShape::PATTERN);
+    CustomDialog * widget = new CustomDialog("Pattern Options",0, "Assign", executeMeshShapeOperations, &MeshOperation::EXEC_ONCLICK);
+    widget->addLineEdit("pattern:",&MeshOperation::PATTERN);
     return widget;
 }
 
 QWidget* createSetFoldsOptions()
 {
-    CustomDialog * widget = new CustomDialog("FoldingOptions",0, "Fold", executeMeshShapeOperations, &MeshShape::EXEC_ONCLICK);
-    widget->addSpinBox("Folds:", 1, 24, &MeshShape::FOLD_N, 1, "Number of Folds");
+    CustomDialog * widget = new CustomDialog("FoldingOptions",0, "Fold", executeMeshShapeOperations, &MeshOperation::EXEC_ONCLICK);
+    widget->addSpinBox("Folds:", 1, 24, &MeshOperation::FOLD_N, 1, "Number of Folds");
     return widget;
 }
 
 QWidget* createExtrudeOptions()
 {
-    CustomDialog * widget = new CustomDialog("Extrusion Options",0, "Exture", executeMeshShapeOperations, &MeshShape::EXEC_ONCLICK);
-    widget->addDblSpinBoxF("Extrusion Amount:", 0, 0.5, &MeshShape::EXTRUDE_T, 2, 0.01, "");
+    CustomDialog * widget = new CustomDialog("Extrusion Options",0, "Exture", executeMeshShapeOperations, &MeshOperation::EXEC_ONCLICK);
+    widget->addDblSpinBoxF("Extrusion Amount:", 0, 0.5, &MeshOperation::EXTRUDE_T, 2, 0.01, "");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
-    widget->addCheckBox ("Keep Faces Together", &MeshShape::isKEEP_TOGETHER,"");
+    widget->addCheckBox ("Keep Faces Together", &MeshOperation::isKEEP_TOGETHER,"");
     // We want our custom dialog called "Registration".
     /*d.addLineEdit (input1+"  ", &Value0, "No middle name!");             // Here's a line edit.
     d.addCheckBox (input2+"  ", &Value1, "my tooltip");       // Here's a checkbox with a tooltip (optional last argument).
@@ -204,6 +212,7 @@ QWidget* createInsertSegmentOptions()
 void MainWindow::createAllOptionsWidgets()
 {
     addOptionsWidget(new QWidget(), Options::NONE);
+    addOptionsWidget(createDragOptions(), Options::DRAG);
     addOptionsWidget(createGridOptions(), Options::GRID);
     addOptionsWidget(createNgonOptions(), Options::NGON);
     addOptionsWidget(createTorusOptions(), Options::TORUS);

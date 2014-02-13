@@ -176,55 +176,36 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
     //send the click to the active shape
     int hit = selectGL(_lastP.x(), _lastP.y());
-
-    //render mode only allows selection of light
-    if(isInRenderMode() && (is(PREVIEW_ON)||is(AMBIENT_ON)||is(SHADOWS_ON)))
-    {
-        if (hit){
-            Selectable_p pSel = select(hit, SelectBuff);
-            if (is(DRAGMODE_ON) && pSel->isUI())
-            {
-                Session::get()->selectionMan()->startSelect(pSel, event->button() == Qt::LeftButton, event->modifiers() & Qt::ControlModifier);
-            }
-        }
+    if (hit){
+        Selectable_p pSel = select(hit, SelectBuff);
+        Session::get()->selectionMan()->startSelect(pSel, event->button() == Qt::LeftButton, event->modifiers() & Qt::ControlModifier);
     }
-    else
-    {
-        if (hit){
-            Selectable_p pSel = select(hit, SelectBuff);
-            Session::get()->selectionMan()->startSelect(pSel, event->button() == Qt::LeftButton, event->modifiers() & Qt::ControlModifier);
-        }
 
-        if (_pActiveShape && !is(DRAGMODE_ON)){
-            if (event->buttons()&Qt::LeftButton)
-                _pActiveShape->sendClick(_lastWorldP, Selectable::DOWN);
-            else if (event->buttons()& Qt::RightButton)
-                _pActiveShape->sendClick(_lastWorldP, Selectable::R_DOWN);
-        }
-        updateGL();
+    Command_p pCommand = Session::get()->theCommand();
+
+    if (!is(DRAGMODE_ON) && pCommand){
+        Click::Type type = event->buttons()&Qt::LeftButton ? (Click::DOWN): ((event->buttons()& Qt::RightButton)?(Click::R_DOWN):Click::NONE);
+        if (type)
+            pCommand->sendClick(Click(type, _lastWorldP));
     }
+    updateGL();
+
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    //render mode does not need release
-    if(!(isInRenderMode() && (is(PREVIEW_ON)||is(AMBIENT_ON)||is(SHADOWS_ON))))
-    {
+    Session::get()->selectionMan()->stopSelect();
+    _lastP = event->pos();
+    _lastWorldP = toWorld(_lastP.x(), _lastP.y());
 
-        Session::get()->selectionMan()->stopSelect();
-        _lastP = event->pos();
-        _lastWorldP = toWorld(_lastP.x(), _lastP.y());
-
-        //send the click to the active shape
-        if (_pActiveShape && !is(DRAGMODE_ON)){
-            if (event->button() == Qt::LeftButton )
-               _pActiveShape->sendClick(_lastWorldP, Selectable::UP);
-            else if (event->button() == Qt::RightButton)
-               _pActiveShape->sendClick(_lastWorldP, Selectable::R_UP);
-        }
-
-        updateGL();
+    //send the click to the active shape
+    Command_p pCommand = Session::get()->theCommand();
+    if (!is(DRAGMODE_ON) && pCommand){
+        Click::Type type = (event->button()==Qt::LeftButton) ? (Click::UP): ((event->button()== Qt::RightButton)?(Click::R_UP):Click::NONE);
+        if (type)
+            pCommand->sendClick(Click(type, _lastWorldP));
     }
+    updateGL();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)

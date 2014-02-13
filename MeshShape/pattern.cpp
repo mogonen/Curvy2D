@@ -1,8 +1,6 @@
 #include "meshshape.h"
 #include "patch.h"
 
-string MeshShape::PATTERN = "1,2";
-
 int * parsePattern(string patternstr , int &len)
 {
     char * cstr = new char [patternstr.length()+1];

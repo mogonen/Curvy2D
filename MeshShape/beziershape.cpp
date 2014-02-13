@@ -112,56 +112,77 @@ void MeshShape::makeSmoothTangents(Corner_p pC){
     }
 }
 
-void MeshShape::makeSmoothCorners(Corner_p pC){
+void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype){
 
     Corner_p c0 = pC;
 
     Corner_p vprev = c0->vPrev();
     Corner_p vnext = c0->vNext();
 
+    ShapeVertex_p sv_tan0 = 0;
+    ShapeVertex_p sv_tan1 = 0;
+    Point p0, p1;
+
     if (vprev && vnext){
-        return; //this is not a corner
-    }
 
-    if (!vprev && !vnext ){
-        ShapeVertex_p sv_tan0 = c0->E()->pData->getTangentSV(c0);
-        sv_tan0->setPair(c0->prev()->E()->pData->getTangentSV(c0));
-        Vec2 tan = P0(c0->next()) - P0(c0->prev());
-        sv_tan0->setTangent(tan/6.0, false, true);
-        return;
-    }
 
-    if (vprev){
 
-        ShapeVertex_p sv_tan0 = c0->E()->pData->getTangentSV(c0);
+        //return; //this is not a corner
+    }else if (!vprev && !vnext ){
+        sv_tan0 = c0->E()->pData->getTangentSV(c0);
+        sv_tan1 = c0->prev()->E()->pData->getTangentSV(c0);
+        sv_tan0->setPair(sv_tan1);
+
+        p0 = P0(c0->next());
+        p1 = P0(c0->prev());
+
+    }else if (vprev){
+
+        sv_tan0 = c0->E()->pData->getTangentSV(c0);
         while(Corner_p c = vprev->vPrev()){
             vprev = c;
         }
 
-        ShapeVertex_p sv_tan1 = vprev->prev()->E()->pData->getTangentSV(vprev);
+        sv_tan1 = vprev->prev()->E()->pData->getTangentSV(vprev);
 
-        if (sv_tan1->pair() != c0->prev()->E()->pData->getTangentSV(c0)) //the border is sharp already
+        if (isskipsharp && (sv_tan1->pair() != c0->prev()->E()->pData->getTangentSV(c0))) //the border is sharp already
             return;
 
         sv_tan0->setPair(sv_tan1);
-        Vec2 tan = P0(c0->next()) - P0(vprev->prev());
-        sv_tan0->setTangent(tan/6.0,c0->E()->isBorder(), true);
+
+        p0 = P0(c0->next());
+        p1 =  P0(vprev->prev());
+
 
     }else{
 
-        ShapeVertex_p sv_tan0 = c0->prev()->E()->pData->getTangentSV(c0);
+        sv_tan0 = c0->prev()->E()->pData->getTangentSV(c0);
         while(Corner_p c = vnext->vNext()){
             vnext = c;
         }
 
-        ShapeVertex_p sv_tan1 = vnext->E()->pData->getTangentSV(vnext);
+        sv_tan1 = vnext->E()->pData->getTangentSV(vnext);
 
-        if (sv_tan1->pair()!= c0->E()->pData->getTangentSV(c0)) //the border is sharp already
+        if (isskipsharp && (sv_tan1->pair()!= c0->E()->pData->getTangentSV(c0))) //the border is sharp already
             return;
 
         sv_tan0->setPair(sv_tan1);
-        Vec2 tan = P0(c0->prev()) - P0(vnext->next());
-        sv_tan0->setTangent(tan/6.0,true, true);
+        p0 = P0(c0->prev());
+        p1 = P0(vnext->next());
+    }
+
+    if (tangenttype!=0){
+        Vec2 tan = p1 - p0;
+        if (tangenttype == 1)
+            sv_tan0->setTangent(-tan/6.0, c0->E()->isBorder(), true);
+        else{
+            tan = tan.normalize();
+            Point p = P0(pC);
+            double a = (p-p0)*tan;
+            double b = (p-p1)*tan;
+            sv_tan0->setTangent(-tan*a/3.0, c0->E()->isBorder(), false);
+            sv_tan1->setTangent(-tan*b/3.0, false, false);
+        }
     }
 }
 
@@ -190,6 +211,9 @@ Bezier* initCurve(Edge_p e){
     sv1_t->pRef = e;
     e->pData->pSV[1] = sv0_t;
     e->pData->pSV[2] = sv1_t;
+
+    e->pData->pSV[0] = e->C0()->V()->pData;
+    e->pData->pSV[3] = e->C0()->next()->V()->pData;
 
     Bezier* c = new Bezier(100);
     e->pData->pCurve = c;

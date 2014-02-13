@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "meshshape/spineshape.h"
 #include "meshshape/meshshape.h"
+#include "MeshShape/meshcommands.h"
 #include "glwidget.h"
 
 #ifdef FACIAL_SHAPE
@@ -25,8 +26,15 @@ bool isInRenderMode(){
     return ( mode == GL_RENDER);
 }
 
-bool MeshShape::IsSelectMode(SELECTION_e eMode){
-    return GetSelectMode() == eMode && !Session::isRender(DRAGMODE_ON);
+bool isSelectMode(MeshOperation::SelectMode eMode){
+
+    if (Session::isRender(DRAGMODE_ON))
+        return false;
+
+    MeshOperation* pMO = dynamic_cast<MeshOperation*>(Session::get()->theCommand());
+    if (!pMO)
+        return false;
+   return pMO->getSelectMode() == eMode;
 }
 
 //void Selectable::renderNamed(bool ispush) const{
@@ -188,7 +196,7 @@ void MeshShape::render(int mode) {
 
     Shape::render(mode);
 
-    if ( (isInRenderMode() || (!isInRenderMode()&&IsSelectMode(EDGE)) ))
+    if ( (isInRenderMode() || (!isInRenderMode()&&isSelectMode(MeshOperation::EDGE)) ))
     {
         EdgeList edges = _control->edges();
         FOR_ALL_CONST_ITEMS(EdgeList, edges)
@@ -198,7 +206,7 @@ void MeshShape::render(int mode) {
     }
 
     //too messy, fix it!
-    if (isInRenderMode() || (!isInRenderMode()&&IsSelectMode(FACE)) )
+    if (isInRenderMode() || (!isInRenderMode()&&isSelectMode(MeshOperation::FACE)) )
     {
         qreal r, g, b;
         //diffuse.getRgbF(&r,&g,&b);

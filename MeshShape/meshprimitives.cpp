@@ -1,19 +1,5 @@
 #include "meshshape.h"
 
-double  MeshShape::GRID_N_LEN = 0.2;
-double  MeshShape::GRID_M_LEN = 0.2;
-
-int     MeshShape::GRID_N  = 2;
-int     MeshShape::GRID_M  = 2;
-int     MeshShape::NGON_N  = 3;
-int     MeshShape::NGON_SEG_V   = 1;
-double  MeshShape::NGON_RAD     = 0.2;
-
-int     MeshShape::TORUS_N      = 8;
-int     MeshShape::TORUS_V      = 3;
-double  MeshShape::TORUS_RAD    = 0.2;
-double  MeshShape::TORUS_ARC    = 1.0;
-
 MeshShape* MeshShape::insertGrid(const Point& p, double nlen, double mlen, int n, int m, MeshShape *pMS){
 
     if (!pMS)

@@ -485,10 +485,13 @@ int CustomDialog::addRadioGrp(QString caption, QString barSepList, int *selIdx,
     if(j<(int)tooltips.size())
       newRadBtn->setToolTip(tooltips[j]);
     e.radBtn.push_back(newRadBtn);
+
+    QObject::connect(newRadBtn, SIGNAL(toggled(bool)),this,SLOT(itemChanged()));
   }
 
   if(!tooltip.isEmpty())
     e.grpBox->setToolTip(tooltip);
+
 
   e.layout->addWidget(e.grpBox);
   layoutNextElement->addLayout(e.layout);

@@ -10,16 +10,18 @@ class EllipseShape;
 class DefaultIO:public FileIO
 {
 
-    bool write(Shape*, ostream& outfile);
-    bool read(Shape*, const istream&);
+    bool write(Shape*, ofstream& outfile);
+    bool read(Shape*, ifstream &);
 
-    bool write(MeshShape*, ostream&);
-    bool read(MeshShape*, const istream&);
+    bool write(MeshShape*, ofstream&);
+    bool read(MeshShape*,  ifstream&);
+
+    Shape*  parseShape(const char*);
 
 public:
 
-    bool load(char *fname);
-    bool save(char *fname);
+    bool load(const char *fname);
+    bool save(const char *fname);
 
     bool exportOBJ(Shape* pShape, char *fname);
     bool exportEPS(Shape* pShape, char *fname);
