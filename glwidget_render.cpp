@@ -14,7 +14,7 @@ bool Session::isRender(RenderSetting rs){
 void GLWidget::renderCanvas()
 {
     if (_pCanvas->_pShape)
-        _pCanvas->_pShape->render(DRAG_MODE);
+        _pCanvas->_pShape->render();
 }
 
 void GLWidget::apply(const Matrix3x3& M){

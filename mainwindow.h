@@ -107,6 +107,9 @@ private slots:
     void newTorus();
     void newSpine();
 
+    void newFacial();
+    void newImageShape();
+
     void transformShape();
     void deleteShape();
 

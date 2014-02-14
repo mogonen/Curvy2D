@@ -24,8 +24,9 @@ int         MeshPrimitive::NGON_SEG_V       = 1;
 double      MeshPrimitive::NGON_RAD         = 0.2;
 
 int         MeshPrimitive::TORUS_N          = 8;
-int         MeshPrimitive::TORUS_V          = 3;
+int         MeshPrimitive::TORUS_V          = 1;
 double      MeshPrimitive::TORUS_RAD        = 0.2;
+double      MeshPrimitive::TORUS_W          = 0.5;
 double      MeshPrimitive::TORUS_ARC        = 1.0;
 
 std::map<Vertex_p, Corner_p> vertexToCornerMap;
@@ -44,6 +45,7 @@ void MeshOperation::execOP(Selectable_p obj){
          pE = dynamic_cast<Edge_p>((Edge_p)obj->pRef);
          if (!pE) return;
          pMS = ((MeshShape*)pE->mesh()->caller());
+         _pE = pE;
     }else if (_operation == EXTRUDE_FACE || _operation == DELETE_FACE){
          pF = dynamic_cast<Face_p>((Face_p)obj->pRef);
          if(!pF) return;
@@ -52,13 +54,17 @@ void MeshOperation::execOP(Selectable_p obj){
 
     if (!pMS) return; //this is kinda redundant
 
+    _pMS = pMS;
+
     switch(_operation){
 
     case NONE:
         break;
 
-    case EXTRUDE_EDGE:
+    case EXTRUDE_EDGE:{
         pMS->extrude(pE, EXTRUDE_T, isKEEP_TOGETHER?&vertexToCornerMap:0);
+        _pF = pE->C1()->F();
+    }
         break;
 
     case INSERT_SEGMENT:
@@ -75,13 +81,13 @@ void MeshOperation::execOP(Selectable_p obj){
 
     case ASSIGN_PATTERN:
     {
-        pMS->assignPattern(pE, PATTERN);
+       //pMS->assignPattern(pE, PATTERN);
     }
         break;
 
     case SET_FOLDS:
     {
-        pMS->setFolds(pE, FOLD_N, FOLD_D);
+        //pMS->setFolds(pE, FOLD_N, FOLD_D);
     }
         break;
 
@@ -103,7 +109,47 @@ Command_p MeshOperation::exec(){
 }
 
 Command_p MeshOperation::unexec(){
-    return 0;
+
+    switch(_operation){
+
+    case NONE:
+        break;
+
+    case EXTRUDE_EDGE:{
+        _pMS->deleteFace(_pF);
+    }
+        break;
+
+    case INSERT_SEGMENT:
+
+        break;
+
+    case EXTRUDE_FACE:
+
+        break;
+
+    case DELETE_FACE:
+
+        break;
+
+    case ASSIGN_PATTERN:
+    {
+
+    }
+        break;
+
+    case SET_FOLDS:
+    {
+
+    }
+        break;
+
+    }
+
+    if (_operation != DELETE_FACE && _pMS)
+        _pMS->Renderable::update();
+
+    return new MeshOperation(_operation);
 }
 
 void MeshOperation::onClick(const Click & click)
@@ -129,7 +175,7 @@ Command_p MeshPrimitive::exec(){
     break;
 
     case TORUS:
-        pMS = MeshShape::insertTorus(Point(), TORUS_N, TORUS_V, TORUS_RAD, TORUS_ARC);
+        pMS = MeshShape::insertTorus(Point(), TORUS_N, TORUS_V, TORUS_RAD, TORUS_W, TORUS_ARC);
     break;
 
     case SPINE:

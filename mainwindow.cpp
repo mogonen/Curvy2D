@@ -495,12 +495,12 @@ void MainWindow::about()
 void MainWindow::unselectDrag()
 {
     //dragAct->setChecked(false);
-    glWidget->setRender(DRAGMODE_ON, false);
+    glWidget->setRender(DRAG_ON, false);
 }
 
 void MainWindow::flipDrag()
 {
-     glWidget->setRender(DRAGMODE_ON, dragAct->isChecked()); //dragAct->isChecked()
+     glWidget->setRender(DRAG_ON, dragAct->isChecked()); //dragAct->isChecked()
      if (dragAct->isChecked())
          setOptionsWidget(Options::DRAG);
 }

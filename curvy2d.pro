@@ -54,5 +54,5 @@ SOURCES += glwidget.cpp \
 
 QT           += opengl widgets
 
-
+DEFINES+=MODELING_MODE
 

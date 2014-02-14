@@ -2,13 +2,16 @@
 #define MESHCOMMANDS_H
 
 #include "../base.h"
+#include "cmesh.h"
 
-/*
-INSERT_GRID, INSERT_2NGON, INSERT_TORUS, INSERT_SPINE
-*/
+using namespace dlfl;
 
 class MeshOperation: public Command
 {
+
+    Face_p      _pF;
+    Edge_p      _pE;
+    MeshShape*  _pMS;
 
 protected:
 
@@ -85,6 +88,7 @@ public:
     static int              TORUS_N;
     static int              TORUS_V;
     static double           TORUS_RAD;
+    static double           TORUS_W;
     static double           TORUS_ARC;
 
 private:

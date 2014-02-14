@@ -82,12 +82,14 @@ void MeshShape::onEnsureUpToDate(){
     }
 }
 
-void MeshShape::makeSmoothTangents(){
+void MeshShape::makeSmoothTangents(bool isskip, int ttype, double tank){
 
     EdgeList edges = _control->edges();
     FOR_ALL_ITEMS(EdgeList, edges){
         Edge_p e = (*it);
-        makeSmoothTangents(e->C0());
+        makeSmoothCorners(e->C0(), isskip, ttype, tank);
+        makeSmoothCorners(e->C1(), isskip, ttype, tank);
+        //makeSmoothTangents(e->C0());
     }
 }
 
@@ -112,7 +114,10 @@ void MeshShape::makeSmoothTangents(Corner_p pC){
     }
 }
 
-void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype){
+void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype, double tan_k){
+
+    if(!pC)
+        return;
 
     Corner_p c0 = pC;
 
@@ -125,13 +130,28 @@ void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype
 
     if (vprev && vnext){
 
+        sv_tan0 = c0->E()->pData->getTangentSV(c0);
 
+        int val = 2;
+        Corner_p c1 = vnext;
+        while(vprev!=vnext){
+            vnext = vnext->vNext();
+            val++;
+        }
+        int skip = val/2 - 1 + (val%2);
+        for(int i=0; i<skip; i++)
+            c1 = c1->vNext();
+
+        sv_tan1 = c1->E()->pData->getTangentSV(c1);
+
+        p0 = P0(c0->next());
+        p1 = P0(c1->next());
 
         //return; //this is not a corner
     }else if (!vprev && !vnext ){
+
         sv_tan0 = c0->E()->pData->getTangentSV(c0);
         sv_tan1 = c0->prev()->E()->pData->getTangentSV(c0);
-        sv_tan0->setPair(sv_tan1);
 
         p0 = P0(c0->next());
         p1 = P0(c0->prev());
@@ -147,8 +167,6 @@ void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype
 
         if (isskipsharp && (sv_tan1->pair() != c0->prev()->E()->pData->getTangentSV(c0))) //the border is sharp already
             return;
-
-        sv_tan0->setPair(sv_tan1);
 
         p0 = P0(c0->next());
         p1 =  P0(vprev->prev());
@@ -166,22 +184,26 @@ void MeshShape::makeSmoothCorners(Corner_p pC, bool isskipsharp, int tangenttype
         if (isskipsharp && (sv_tan1->pair()!= c0->E()->pData->getTangentSV(c0))) //the border is sharp already
             return;
 
-        sv_tan0->setPair(sv_tan1);
         p0 = P0(c0->prev());
         p1 = P0(vnext->next());
     }
 
-    if (tangenttype!=0){
-        Vec2 tan = p1 - p0;
+    if (sv_tan0->pair() || sv_tan1->pair())
+        return;
+
+    sv_tan0->setPair(sv_tan1);
+    if (tangenttype!=0){       
+        Vec2 tan  = p1 - p0;
+        Point p = P0(pC);
+
         if (tangenttype == 1)
-            sv_tan0->setTangent(-tan/6.0, c0->E()->isBorder(), true);
+            sv_tan0->setTangent(-tan/6.0*tan_k,((Edge_p)(sv_tan0->pRef))->isBorder(), true);//c0->E()->isBorder()
         else{
             tan = tan.normalize();
-            Point p = P0(pC);
             double a = (p-p0)*tan;
             double b = (p-p1)*tan;
-            sv_tan0->setTangent(-tan*a/3.0, c0->E()->isBorder(), false);
-            sv_tan1->setTangent(-tan*b/3.0, false, false);
+            sv_tan0->setTangent(-tan*a/3.0*tan_k, ((Edge_p)(sv_tan0->pRef))->isBorder(), false);
+            sv_tan1->setTangent(-tan*b/3.0*tan_k, ((Edge_p)(sv_tan1->pRef))->isBorder(), false);
         }
     }
 }

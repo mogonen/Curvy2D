@@ -10,6 +10,11 @@ void Canvas::insert(Shape_p sp)
     UPDATE_GL
 }
 
+void Canvas::remove(Shape_p sp)
+{
+    clear();
+}
+
 void Canvas::clear(){
     delete _pShape;
     _pShape = 0;
@@ -29,9 +34,6 @@ void GLWidget::insertShape(Shape_p pShape)
 
     _pCanvas->insert(pShape);
 
-    if (_pActiveShape)
-        delete _pActiveShape;
-
-    _pActiveShape = pShape;
+    Session::get()->activate(pShape);
     updateGL();
 }

@@ -28,7 +28,7 @@ bool isInRenderMode(){
 
 bool isSelectMode(MeshOperation::SelectMode eMode){
 
-    if (Session::isRender(DRAGMODE_ON))
+    if (isInRenderMode() || Session::isRender(DRAG_ON))
         return false;
 
     MeshOperation* pMO = dynamic_cast<MeshOperation*>(Session::get()->theCommand());
@@ -37,14 +37,9 @@ bool isSelectMode(MeshOperation::SelectMode eMode){
    return pMO->getSelectMode() == eMode;
 }
 
-//void Selectable::renderNamed(bool ispush) const{
-//    glLoadName(name());
-//    render();
-//}
-
 void Selectable::render(int mode)
 {
-    if(mode&DRAG_MODE)
+    if(!isInRenderMode())
         glLoadName(name());
 }
 
@@ -105,7 +100,7 @@ void ControlPoint::render(int mode) {
 
 void Shape::render(int mode)
 {
-    if(Session::isRender(DRAGMODE_ON))
+    if(Session::isRender(DRAG_ON))
        Session::get()->controller()->renderControls((Shape_p)this);
 
     Draggable::render(mode);
@@ -196,7 +191,7 @@ void MeshShape::render(int mode) {
 
     Shape::render(mode);
 
-    if ( (isInRenderMode() || (!isInRenderMode()&&isSelectMode(MeshOperation::EDGE)) ))
+    if ( isInRenderMode() || isSelectMode(MeshOperation::EDGE) )
     {
         EdgeList edges = _control->edges();
         FOR_ALL_CONST_ITEMS(EdgeList, edges)
@@ -206,7 +201,7 @@ void MeshShape::render(int mode) {
     }
 
     //too messy, fix it!
-    if (isInRenderMode() || (!isInRenderMode()&&isSelectMode(MeshOperation::FACE)) )
+    if (isInRenderMode() || isSelectMode(MeshOperation::FACE) )
     {
         qreal r, g, b;
         //diffuse.getRgbF(&r,&g,&b);
@@ -229,7 +224,7 @@ void MeshShape::render(Edge_p pEdge) const{
         return;
 
     if (pEdge->pData->pCurve){
-        pEdge->pData->pCurve->render(DRAG_MODE);
+        pEdge->pData->pCurve->render();
         return;
     }
     //non selectable line representation
@@ -352,8 +347,8 @@ void TransformHandler::render() const{
     if (!_pShape || _pShape!=theSHAPE)
         return;
 
-    _handles[0]->render(DRAG_MODE);
-    _handles[1]->render(DRAG_MODE);
+    _handles[0]->render();
+    _handles[1]->render();
     //_rotHandle->renderNamed();
 
     if (isInRenderMode()){

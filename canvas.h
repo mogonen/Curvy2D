@@ -22,6 +22,7 @@ public:
     }
 
     void insert(Shape_p sp);
+    void remove(Shape_p sp);
     void clear();
 
 	int saveTo(const char * fname);

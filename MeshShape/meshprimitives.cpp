@@ -75,7 +75,7 @@ MeshShape* MeshShape::insertNGon(const Point& p, int n, int segv, double rad, Me
 
 }
 
-MeshShape* MeshShape::insertTorus(const Point& p, int n, int v, double rad, double arc, MeshShape* pMS)
+MeshShape* MeshShape::insertTorus(const Point& p, int n, int v, double rad, double w, double arc, MeshShape* pMS)
 {
 
     if (!pMS)
@@ -84,21 +84,21 @@ MeshShape* MeshShape::insertTorus(const Point& p, int n, int v, double rad, doub
     bool isarc = arc < 0.9999;
 
     int segU = n;
-    int segV = v;
-    int nU = segU+isarc;
+    int nV = (v+1);
+    int nU = segU + isarc;
 
     double step_u = 2*PI / segU * arc;
-    Vertex_p* vs = new Vertex_p[nU*segV];
+    Vertex_p* vs = new Vertex_p[nU*nV];
 
-    FOR_ALL_J(segV){
+    FOR_ALL_J(nV){
         FOR_ALL_I(nU){
             double ang_u = -step_u * i;
             Point p(cos(ang_u)*rad, sin(ang_u)*rad);
-            vs[i+j*nU] = pMS->addMeshVertex(p*(1-0.6/segV*j));
+            vs[i+j*nU] = pMS->addMeshVertex(p*(1.0 - w/(nV-1)*j ) );
         }
     }
 
-    FOR_ALL_J(segV-1){
+    FOR_ALL_J(nV-1){
         FOR_ALL_I(segU){
             pMS->_control->addQuad(vs[i+j*nU] , vs[(i+1)%nU + j*nU], vs[(i+1)%nU + (j+1)*nU], vs[i + (j+1)*nU]);
         }
@@ -106,9 +106,11 @@ MeshShape* MeshShape::insertTorus(const Point& p, int n, int v, double rad, doub
 
     delete vs;
     pMS->_control->buildEdges();
-    if (isSMOOTH)
-        pMS->makeSmoothTangents();
 
+    if (isSMOOTH){
+        double k =  8.0/segU;
+        pMS->makeSmoothTangents(false, 1, pow(k,k/3.0));
+    }
     pMS->Renderable::update();
     return pMS;
 }

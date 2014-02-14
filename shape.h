@@ -1,5 +1,5 @@
-#ifndef SHAPE_H
-#define SHAPE_H
+#ifndef __SHAPE_H__
+#define __SHAPE_H__
 
 #include <list>
 #include <map>
@@ -8,10 +8,11 @@
 #include <QColor>
 #include "base.h"
 
-
 #define NORMAL_RAD 0.04
 #define NORMAL_CONTROL_BIT 30
 #define SV_ID_BIT 16
+
+enum ShapeType {MESH_SHAPE, SPINE_SHAPE, ELLIPSE_SHAPE, IMAGE_SHAPE};
 
 class Shape;
 class Shader;
@@ -23,7 +24,6 @@ typedef ShapeVertex*                    ShapeVertex_p;
 typedef std::list<ShapeVertex_p>        SVList;
 typedef std::map<int, ShapeVertex_p>    SVMap;
 
-enum ShapeType {MESH_SHAPE, SPINE_SHAPE, ELLIPSE_SHAPE, IMAGE_SHAPE};
 
 //4 channel unsigned bytes assumed here.
 struct textureInfo
@@ -54,7 +54,7 @@ struct ShapeVertex
     void drag(const Vec2& t, bool isNormal = false, bool isC2 = false);
 
     void adopt(ShapeVertex_p sv);
-    void setPair(ShapeVertex_p sv, bool isSetTangent = false , bool isSetNormal = false);
+    void setPair(ShapeVertex_p sv, bool isSetTangent =false , bool isSetNormal = false);
     void unpair();
     void setTangent(const Vec2&, bool isnormal=false, bool ispair=false);
     Vec2 getTangent();
@@ -106,6 +106,9 @@ protected:
     virtual void        onScale(const Vec2&){}
     virtual void        onApplyT(const Matrix3x3&){}
     virtual void        onClick(const Click&){}
+
+    virtual void        onStartDrag(ShapeVertex_p){}
+    virtual void        onStopDrag(ShapeVertex_p){}
     virtual void        onDrag(ShapeVertex_p, const Vec2&){}
 
 public:
@@ -115,16 +118,16 @@ public:
     void                render(int mode = 0);
     virtual ShapeType   type() const = 0;
 
-
     //Vertex Handling
     ShapeVertex_p       addVertex();
     ShapeVertex_p       addVertex(const Point& p, ShapeVertex_p parent = 0, bool isPositionControl = true, bool isNormalControl = true);
     void                removeVertex(ShapeVertex_p sv);
     void                removeVertex(Point_p pP);
     SVList              getVertices() const {return _vertices;}
-    virtual void        outdate(ShapeVertex_p sv){}//{ Renderable::outdate(); }
 
-	//send generic command to the shape
+    virtual void        outdate(ShapeVertex_p sv){ Renderable::outdate(); }
+
+    //send generic command to the shape
     enum    Command_e {};
     virtual void        exec(Command_e){}
     void                sendClick(const Click&);
@@ -144,75 +147,30 @@ public:
     virtual void        getBBox(BBox& bbox) const;
     void                centerPivot();
 
-	//flag operations
+    //flag operations
     bool                is(unsigned int bit){return _flags & (1 << bit);}
     void                set(unsigned int bit){_flags |= (1 << bit);}
     void                unset(unsigned int bit){_flags &= ~(1 << bit);}
 
-	//save&load
-    virtual bool         load(std::ifstream&){return false;}
-    virtual bool         save(std::ofstream&){return false;}
+    //for now
+    QColor diffuse;
+
+#ifndef MODELING_MODE
+    //These eventually need to move out
+    //Shader related funcs --> actually should not be here
+    virtual void        calAverageNormal(){_shaderParam.m_averageNormal = QVector2D(0.0,0.0);}
+    ShaderParameters    getShaderParam(){return _shaderParam;}
+    void                setLayerLabel(unsigned char dep = 0){_shaderParam.m_layerLabel = dep;}
+
+    textureInfo m_brightTex;
+    textureInfo m_darkTex;
+    textureInfo m_smTex;
+
+protected:
+    ShaderParameters       _shaderParam;
+#endif
 
 };
 
 #endif
 
-
-/*
-//    ShaderParameters* shader() const {return _shaderParam;}
-//    ShaderParameters* initializeParam()
-//        if(_shaderParam)
-//            delete _shaderParam;
-//        _shaderParam = new ShaderParameters();
-//        return _shaderParam;
-//    }
-
-//    void setAlpha()
-//    {
-
-//    }
-
-//    void setTranslucency()
-//    {
-
-//    }
-
-//    void setSMQuality()
-//    {
-
-//    }
-
-//    void toggleMirror()
-//    {
-
-//    }
-
-//    void setBrightParam()
-//    {
-////        if(m_brightTex.data)
-////            _shaderParam->LoadBrightImage(m_brightTex.data,m_brightTex.width,m_brightTex.height);
-//    }
-//    void setDarkParam()
-//    {
-////        if(m_darkTex.data)
-////            _shaderParam->LoadDarkImage(m_darkTex.data,m_darkTex.width,m_darkTex.height);
-//    }
-
-//    void setShapeMapTex()
-//    {
-
-//    }
-
-//    virtual void loadBrightTex(QString name = QString())
-//    {
-////        QImage m_temp(name);
-////        m_brightTex
-//    }
-//    virtual void loadDarkTex(QString name)
-//    {
-
-//    }
-//    virtual void loadSMTex(QString name){
-
-//    }
-*/

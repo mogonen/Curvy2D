@@ -27,8 +27,8 @@ class Canvas;
 class ShapeControl;
 class MainWindow;
 
-enum RenderSetting {DRAGMODE_ON, SHADING_ON, AMBIENT_ON, SHADOWS_ON, NORMALS_ON, WIREFRAME_ON, PREVIEW_ON};
-enum RenderMode {DEFAULT_MODE = 0, DRAG_MODE = 1, SM_MODE = 2, DARK_MODE = 4, BRIGHT_MODE = 8, LABELDEPTH_MODE = 16};
+enum RenderSetting  {DRAG_ON, SHADING_ON, AMBIENT_ON, SHADOWS_ON, NORMALS_ON, WIREFRAME_ON, PREVIEW_ON};
+enum PreviewSetting {DEFAULT_MODE = 0, SM_MODE = 1, DARK_MODE = 2, BRIGHT_MODE = 4, LABELDEPTH_MODE = 8};
 
 
 typedef void* Void_p;
@@ -310,7 +310,7 @@ public:
     Shape*              theShape() const;
     void                activate(Shape*);
     Shape*              deactivate();
-    void                insertShape(Shape*);
+    void                insertShape(Shape*, bool isactivate=true);
     void                removeShape(Shape*);
 
     static void         init(MainWindow*);

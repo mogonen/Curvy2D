@@ -72,7 +72,6 @@ public:
     static void         loadCameraParameters();
 
     void                apply(const Matrix3x3& tM);
-    void                updateGLSLLight(float x, float y, float z);
 
     static bool         is(RenderSetting rs){return _renderFlags&(1<<rs);}
     void                setRender(RenderSetting rs, bool);
@@ -116,6 +115,7 @@ private:
     Shape               *_pActiveShape;
     Canvas              *_pCanvas;
 
+    static unsigned int  _renderFlags;
 
 
     QVector2D _mousePressPosition;
@@ -126,12 +126,26 @@ private:
     qreal _translateY;
     qreal _translateZ;
 
-    static unsigned int  _renderFlags;
-
 public slots:
 
     void updateActive();
 
-};
+#ifndef MODELING_MODE
 
+
+//************************ NOW PREVIEW STUFF ***********************************
+public:
+    Shape*              removeActive();
+    ShaderProgram*      getRShader(){return _pGLSLShader_R;}
+    ShaderProgram*      getMShader(){return _pGLSLShader_M;}
+    void                reloadShader(){_pGLSLShader_R->ReloadShader();_pGLSLShader_M->ReloadShader();}
+    void                updateGLSLLight(float x, float y, float z);
+
+private:
+    ShaderProgram       *_pGLSLShader_R;
+    ShaderProgram       *_pGLSLShader_M;
+
+
+#endif
+};
 #endif // GLWIDGET_H

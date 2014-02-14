@@ -26,16 +26,38 @@ void Session::init(MainWindow * pMW){
     _pSession->_pCommand        = 0;
 }
 
+void Session::activate(Shape_p sp){
+    //_pGlWidget->activate(sp);
+    _pMainWindow->setAttrWidget((void*)sp);
+}
+
+Shape* Session::deactivate(){
+    _pMainWindow->setAttrWidget((void*)0);
+    return 0;//_pGlWidget->deactivate();
+}
+
 Shape* Session::theShape() const{
     return _pGlWidget->activeShape();
 }
 
-void Session::insertShape(Shape* pShape){
+void Session::insertShape(Shape* pShape, bool isactivate){
     if (!pShape)
         return;
-    //_pCanvas->insert(pShape);
-    _pGlWidget->insertShape(pShape);
-    _pMainWindow->setAttrWidget((void*)pShape);
+    _pCanvas->insert(pShape);
+    if (isactivate)
+        activate(pShape);
+    _pGlWidget->updateGL();
+}
+
+void Session::removeShape(Shape* pShape){
+    reset();
+    /*if (!pShape)
+        return;
+    if (pShape == _pGlWidget->activeShape())
+        _pGlWidget->deactivate();
+    _pMainWindow->removeAttrWidget((void*)pShape);
+    _pCanvas->remove(pShape);*/
+    _pGlWidget->updateGL();
 }
 
 void Session::reset(){
@@ -77,6 +99,7 @@ void  Session::exec(){
     Command_p newcommand = _pCommand->exec();
     _commands.push_back(_pCommand);
     _pCommand = newcommand;
+    _pGlWidget->updateGL();
 }
 
 int   Session::undo(){
@@ -85,6 +108,7 @@ int   Session::undo(){
     Command_p pCommand = _commands.back();
     _commands.pop_back();
     pCommand->unexec();
+    _pGlWidget->updateGL();
     return _commands.size()+1;
 }
 
@@ -96,14 +120,6 @@ void Session::cancel(){
     if (!_pCommand)
         return
     _pCommand->cancel();
+    _pGlWidget->updateGL();
 }
 
-/*void Session::cancel(){
-    _pController->cancel();
-    _pGlWidget->deactivate();
-}
-
-void Session::cancel(){
-    _pController->cancel();
-    _pGlWidget->deactivate();
-}*/

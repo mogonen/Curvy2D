@@ -4,8 +4,8 @@
 
 int     Patch::N;
 int     Patch::Ni;
-int     Patch::NU = 8;
-int     Patch::NV = 8;
+int     Patch::NU = 4;
+int     Patch::NV = 4;
 double  Patch::T;
 bool    Patch::isH = true;
 

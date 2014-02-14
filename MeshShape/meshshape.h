@@ -44,11 +44,11 @@ public:
     //primitives
     static MeshShape*       insertGrid(const Point& p, double nlen, double mlen, int n, int m, MeshShape* pMS = 0);
     static MeshShape*       insertNGon(const Point& p, int n, int segv, double rad, MeshShape* pMS = 0);
-    static MeshShape*       insertTorus(const Point& p, int n, int v, double rad, double arc, MeshShape* pMS = 0);
+    static MeshShape*       insertTorus(const Point& p, int n, int v, double rad, double w, double arc, MeshShape* pMS = 0);
 
-    void                    makeSmoothTangents();
+    void                    makeSmoothTangents(bool isskip = false, int ttype = 2, double tank =1.0);
     void                    makeSmoothTangents(Corner_p);
-    void                    makeSmoothCorners(Corner_p, bool isskipsharp = true, int tangenttype=1);
+    void                    makeSmoothCorners(Corner_p, bool isskipsharp = true, int tangenttype=1, double tan_k=1.0);
 
     //mesh operations
     void                    insertSegment(Edge_p, const Point&);

@@ -7,13 +7,18 @@
 #include "MeshShape/meshcommands.h"
 #include "commands.h"
 
+#ifndef MODELING_MODE
+#include "Renderer/imageshape.h"
+#ifdef FACIAL_SHAPE
+//#include "FacialShape/facialshape.h"
+#endif
+#endif
 
 QWidget* createAttrWidget(Shape_p pShape)
 {
     CustomDialog * widget = new CustomDialog("Shape Attr");
     //widget->addSpinBox("test:", 1, 8, &MeshShape::GRID_N, 1, "Rows");
-    widget->addSpinBox("U segments:", 2, 24, &Patch::NU, 1);
-    widget->addSpinBox("V segments:", 2, 24, &Patch::NV, 1);
+    //widget->addSpinBox("U segments:", 2, 24, &Patch::N, 1);
     //widget->addColorSel("Diffuse:", &pShape->diffuse, "");
     QObject::connect(widget,SIGNAL(ValueUpdated()),Session::get()->glWidget(),SLOT(updateActive()));
     return widget;
@@ -118,6 +123,19 @@ void MainWindow::newTorus()
     setOptionsWidget(Options::TORUS);
 }
 
+void MainWindow::newFacial()
+{
+#ifdef FACIAL_SHAPE
+    glWidget->insertShape(new FacialShape());
+    //unselectDrag();
+#endif
+}
+
+void MainWindow::newImageShape()
+{
+    setOptionsWidget(Options::IMAGE_SHAPE);
+}
+
 QWidget* createDragOptions()
 {
     CustomDialog * widget = new CustomDialog("Drag Tool Options",0);
@@ -150,10 +168,11 @@ QWidget* createNgonOptions()
 QWidget* createTorusOptions()
 {
     CustomDialog * widget = new CustomDialog("Torus Options",0, "Insert", createTorus);
-    widget->addSpinBox("Sides:", 1, 8, &MeshPrimitive::TORUS_N, 1, "Sides of Torus");
-    widget->addSpinBox("V Segments:", 3, 8, &MeshPrimitive::TORUS_V, 1, "Vertical Segments of The Torus");
+    widget->addSpinBox("Sides:", 2, 24, &MeshPrimitive::TORUS_N, 1, "Sides of Torus");
+    widget->addSpinBox("V Segments:", 1, 8, &MeshPrimitive::TORUS_V, 1, "Vertical Segments of The Torus");
     widget->addCheckBox ("Keep Tangents Smooth", &MeshShape::isSMOOTH,"");
     widget->addDblSpinBoxF("Radius:", 0.01, 0.75, &MeshPrimitive::TORUS_RAD, 2, 0.01, "");
+    widget->addDblSpinBoxF("Width%:", 0.01, 0.99, &MeshPrimitive::TORUS_W, 2, 0.01, "");
     widget->addDblSpinBoxF("Arc:", 0., 1.0, &MeshPrimitive::TORUS_ARC, 2, 0.01, "");
     return widget;
 }
